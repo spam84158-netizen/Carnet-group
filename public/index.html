@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sunset</title>
+<title> Sunset com</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Sacramento&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -208,21 +208,22 @@
   }
 
   .bottom-nav{
-    position:fixed; bottom:16px; left:50%; transform:translateX(-50%);
-    background:rgba(20,20,22,0.85);
+    position:fixed; bottom:0; left:0; right:0;
+    background:rgba(11,11,12,0.92);
     backdrop-filter:blur(14px);
-    border:1px solid var(--verre-bord);
-    border-radius:100px;
-    display:flex; gap:2px; padding:6px;
+    border-top:1px solid var(--verre-bord);
+    display:flex; justify-content:space-around; align-items:center;
+    padding:10px 8px calc(10px + env(safe-area-inset-bottom));
     z-index:20;
   }
   .nav-btn{
-    padding:10px 18px; border-radius:100px;
-    font-size:12px; font-weight:600; letter-spacing:.05em; text-transform:uppercase;
+    width:44px; height:44px; border-radius:12px;
+    display:flex; align-items:center; justify-content:center;
     color:var(--creme); opacity:.45;
     background:transparent;
   }
-  .nav-btn.active{ opacity:1; color:var(--or-clair); background:rgba(201,162,75,0.1); }
+  .nav-btn svg{ width:22px; height:22px; }
+  .nav-btn.active{ opacity:1; color:var(--or-clair); background:rgba(201,162,75,0.12); }
 
   /* ---------- CONTACTS ---------- */
   .contact-row{
@@ -405,7 +406,7 @@
       <label>Numéro WhatsApp</label>
       <input type="tel" id="f-phone" placeholder="+225 07 00 00 00 00">
     </div>
-    <div class="hint">Visible par les autres membres du carnet, pour qu'ils puissent te contacter directement veuillez ajouter l'indicatif du pays</div>
+    <div class="hint">Visible par les autres membres du carnet, pour qu'ils puissent te contacter directement.</div>
     <div class="form-error" id="form-error">Merci de remplir tous les champs correctement.</div>
     <button class="btn-primary" style="width:100%;" onclick="submitRegistration()">Valider ma carte</button>
   </div>
@@ -451,7 +452,7 @@
 <!-- ===================== ECRAN 7 : SOLDE ===================== -->
 <div class="screen" id="screen-solde">
   <div class="app-header">
-    <h2 class="app-title">Mon solde🏦</h2>
+    <h2 class="app-title">Mon solde</h2>
   </div>
   <div class="card-panel" style="max-width:460px;">
     <div class="hint" style="margin-bottom:16px;">Ton lien de parrainage — chaque personne qui s'inscrit via ce lien compte pour toi.</div>
@@ -487,18 +488,28 @@
 
 <!-- ===================== NAV BAR ===================== -->
 <div class="bottom-nav" id="bottom-nav" style="display:none;">
-  <button class="nav-btn" id="nav-contacts" onclick="goTo('contacts')">Annuaire</button>
-  <button class="nav-btn" id="nav-wall" onclick="goTo('wall')">Cercle</button>
-  <button class="nav-btn" id="nav-solde" onclick="goTo('solde')">Solde</button>
-  <button class="nav-btn" id="nav-join" onclick="goTo('join')">Groupe</button>
-  <button class="nav-btn" id="nav-admin" onclick="goTo('admin')" style="display:none;">Admin</button>
+  <button class="nav-btn" id="nav-contacts" onclick="goTo('contacts')" title="Annuaire">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M17 3.13a4 4 0 0 1 0 7.75"/></svg>
+  </button>
+  <button class="nav-btn" id="nav-wall" onclick="goTo('wall')" title="Cercle">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+  </button>
+  <button class="nav-btn" id="nav-solde" onclick="goTo('solde')" title="Solde">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M6 15h4"/></svg>
+  </button>
+  <button class="nav-btn" id="nav-join" onclick="goTo('join')" title="Groupe">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7Z"/></svg>
+  </button>
+  <button class="nav-btn" id="nav-admin" onclick="goTo('admin')" style="display:none;" title="Admin">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>
+  </button>
 </div>
 
 <script>
 /* ================== CONFIG — à personnaliser avant de partager ================== */
 const CONFIG = {
   GROUP_NAME: "Le Carnet",
-  GROUP_EYEBROW: "Sunset friands privé",
+  GROUP_EYEBROW: "Best Friends Sunset",
   GROUP_JOIN_LINK: "https://chat.whatsapp.com/H39dmSIg76hCMN4K6O7NBv",
   VERIFIED_FULL_NAMES: ["Junny"]
 };
