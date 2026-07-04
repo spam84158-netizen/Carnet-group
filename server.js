@@ -40,6 +40,9 @@ async function initDb(){
       ts BIGINT
     );
   `);
+  await pool.query(`ALTER TABLE members ADD COLUMN IF NOT EXISTS referred_by TEXT;`);
+  await pool.query(`ALTER TABLE members ADD COLUMN IF NOT EXISTS videos_count INTEGER DEFAULT 0;`);
+  await pool.query(`ALTER TABLE members ADD COLUMN IF NOT EXISTS likes_count INTEGER DEFAULT 0;`);
 }
 
 function rowToMember(r){
