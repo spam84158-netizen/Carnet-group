@@ -339,6 +339,15 @@
   .loader{
     display:flex; align-items:center; justify-content:center;
     min-height:100vh; color:var(--or-clair); font-family:'Cormorant Garamond'; font-size:20px;
+    flex-direction:column; text-align:center; padding:20px; gap:14px;
+  }
+  .loader-error{
+    font-family:'Inter'; font-size:13px; color:#D9707C; max-width:340px; line-height:1.6; display:none;
+  }
+  .loader-retry{
+    background:transparent; border:1px solid var(--or); color:var(--or-clair);
+    padding:10px 22px; border-radius:100px; font-size:12px; font-weight:600;
+    letter-spacing:.05em; text-transform:uppercase; display:none;
   }
   .empty-state{
     text-align:center; opacity:.4; padding:40px 20px; max-width:320px; font-size:14px;
@@ -472,7 +481,11 @@
 </head>
 <body>
 
-<div id="loader" class="loader">Ouverture du carnet…</div>
+<div id="loader" class="loader">
+  <div>Ouverture du carnet…</div>
+  <div class="loader-error" id="loader-error"></div>
+  <button class="loader-retry" id="loader-retry" onclick="window.location.reload()">Réessayer</button>
+</div>
 
 <!-- ===================== ECRAN 1 : ACCUEIL ===================== -->
 <div class="screen" id="screen-welcome">
@@ -787,22 +800,32 @@ let members = [];
 let pendingPhoto = null;
 let myId = null;
 
+/* Helper: ne jamais laisser un fetch bloquer indéfiniment (ex: serveur endormi) */
+function fetchWithTimeout(url, options, timeoutMs){
+  timeoutMs = timeoutMs || 12000;
+  return Promise.race([
+    fetch(url, options),
+    new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), timeoutMs))
+  ]);
+}
+
 async function loadMembers(){
   try{
-    const res = await fetch('/api/members');
+    const res = await fetchWithTimeout('/api/members', {}, 12000);
     members = res.ok ? await res.json() : [];
   }catch(e){
+    console.warn('loadMembers a échoué, on continue sans données serveur :', e);
     members = [];
   }
 }
 
 async function saveMember(member){
   try{
-    const res = await fetch('/api/members', {
+    const res = await fetchWithTimeout('/api/members', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(member)
-    });
+    }, 15000);
     if(!res.ok) return null;
     const data = await res.json(); // { member: {...}, members: [...] }
     members = data.members;
@@ -838,7 +861,6 @@ function goTo(screen){
   if(screen === 'videos') switchVideoTab(videoTab);
   if(screen === 'profile') renderProfile();
   if(screen === 'monetisation') renderMonetisation();
-  if(screen === 'accounts') renderAccounts();
   if(screen === 'accounts') renderAccounts();
   window.scrollTo(0,0);
 }
@@ -1214,9 +1236,10 @@ let videos = [];
 
 async function loadVideos(){
   try{
-    const res = await fetch('/api/videos');
+    const res = await fetchWithTimeout('/api/videos', {}, 12000);
     videos = res.ok ? await res.json() : [];
   }catch(e){
+    console.warn('loadVideos a échoué, on continue sans données serveur :', e);
     videos = [];
   }
 }
@@ -1770,18 +1793,51 @@ async function requestWithdrawalFromMonetisation(){
 }
 
 /* ================== INIT ================== */
+/* Filet de sécurité : si quoi que ce soit plante ou prend trop de temps,
+   on affiche un message clair au lieu de rester bloqué sur "Ouverture du carnet…" */
+function showLoaderError(message){
+  const errEl = document.getElementById('loader-error');
+  const retryBtn = document.getElementById('loader-retry');
+  if(errEl){ errEl.textContent = message; errEl.style.display = 'block'; }
+  if(retryBtn){ retryBtn.style.display = 'inline-block'; }
+}
+
+window.addEventListener('error', function(ev){
+  console.error('Erreur JS globale :', ev.error || ev.message);
+  showLoaderError('Une erreur est survenue au chargement (' + (ev.message || 'inconnue') + '). Réessaie, ou signale ce message.');
+});
+window.addEventListener('unhandledrejection', function(ev){
+  console.error('Promesse rejetée non gérée :', ev.reason);
+});
+
 (async function init(){
-  await loadMembers();
-  await loadVideos();
-  document.getElementById('loader').style.display = 'none';
-  const savedId = localStorage.getItem('myMemberId');
-  if(savedId && members.find(m => m.id === savedId)){
-    myId = savedId;
-    saveAccountToDevice(myId); // rattrape les comptes créés avant l'ajout du multi-compte
-    updateAdminNavVisibility();
-    goTo('wall');
-  } else {
-    goTo('welcome');
+  // Filet de sécurité supplémentaire : si l'initialisation dépasse 15s pour une raison
+  // quelconque, on force l'affichage de l'écran d'accueil au lieu de rester bloqué.
+  const forceTimeout = setTimeout(function(){
+    const loader = document.getElementById('loader');
+    if(loader && loader.style.display !== 'none'){
+      showLoaderError('Le chargement prend trop de temps (le serveur met peut-être du temps à démarrer). Tu peux réessayer.');
+    }
+  }, 15000);
+
+  try{
+    await loadMembers();
+    await loadVideos();
+    clearTimeout(forceTimeout);
+    document.getElementById('loader').style.display = 'none';
+    const savedId = localStorage.getItem('myMemberId');
+    if(savedId && members.find(m => m.id === savedId)){
+      myId = savedId;
+      saveAccountToDevice(myId); // rattrape les comptes créés avant l'ajout du multi-compte
+      updateAdminNavVisibility();
+      goTo('wall');
+    } else {
+      goTo('welcome');
+    }
+  }catch(e){
+    clearTimeout(forceTimeout);
+    console.error('Erreur au démarrage :', e);
+    showLoaderError('Erreur au démarrage : ' + (e && e.message ? e.message : e) + '. Tu peux réessayer.');
   }
 })();
 </script>
