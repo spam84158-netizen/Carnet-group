@@ -521,14 +521,14 @@
 <!-- ===================== ECRAN 7 : SOLDE ===================== -->
 <div class="screen" id="screen-solde">
   <div class="app-header">
-    <h2 class="app-title">Mon solde🏦</h2>
+    <h2 class="app-title">Mon solde</h2>
   </div>
   <div class="card-panel" style="max-width:460px;">
     <div class="hint" style="margin-bottom:16px;">Ton lien de parrainage — chaque personne qui s'inscrit via ce lien compte pour toi.</div>
     <div class="field">
       <input type="text" id="referral-link" readonly style="font-size:12.5px;">
     </div>
-    <button class="upload-btn" style="margin-bottom:20px;" onclick="copyReferralLink()">Copier le lien📩</button>
+    <button class="upload-btn" style="margin-bottom:20px;" onclick="copyReferralLink()">Copier le lien</button>
 
     <div class="mcard-divider"></div>
     <div class="mcard-meta" style="margin:16px 0; font-size:14px;">
@@ -551,7 +551,7 @@
 
     <div class="field">
       <label>Numéro <span id="withdraw-method-label-tag">Wave</span></label>
-      <input type="tel" id="withdraw-payment-number" placeholder="34700000000">
+      <input type="tel" id="withdraw-payment-number" placeholder="+225 07 00 00 00 00">
     </div>
 
     <div class="field">
@@ -559,7 +559,7 @@
       <input type="number" id="withdraw-amount" placeholder="10000" min="1" max="50000">
     </div>
     <div class="form-error" id="withdraw-error">Montant invalide.</div>
-    <div class="hint" id="withdraw-success" style="display:none; color:var(--or-clair);">Demande de retrait envoyée </div>
+    <div class="hint" id="withdraw-success" style="display:none; color:var(--or-clair);">Demande envoyée — elle sera traitée manuellement.</div>
     <button class="btn-primary" id="withdraw-submit-btn" style="width:100%;" onclick="requestWithdrawal()">Demander un retrait</button>
   </div>
 </div>
@@ -620,13 +620,20 @@
 <!-- ===================== ECRAN 12 : PARAMETRES ===================== -->
 <div class="screen" id="screen-settings">
   <div class="app-header">
-    <h2 class="app-title">⚙️Paramètres</h2>
+    <h2 class="app-title">Paramètres</h2>
   </div>
   <div style="width:100%; max-width:460px;">
     <div class="contact-row" style="cursor:pointer;" onclick="goTo('monetisation')">
       <div class="contact-info">
         <div class="contact-name">Monétisation</div>
         <div class="contact-phone">Conditions et demande de retrait</div>
+      </div>
+      <span class="contact-action">Ouvrir</span>
+    </div>
+    <div class="contact-row" style="cursor:pointer;" onclick="goTo('accounts')">
+      <div class="contact-info">
+        <div class="contact-name">Mes comptes</div>
+        <div class="contact-phone">Gérer jusqu'à 3 comptes sur cet appareil</div>
       </div>
       <span class="contact-action">Ouvrir</span>
     </div>
@@ -674,6 +681,51 @@
   </div>
 </div>
 
+<!-- ===================== ECRAN 14 : MES COMPTES ===================== -->
+<div class="screen" id="screen-accounts">
+  <div class="app-header">
+    <h2 class="app-title">Mes comptes</h2>
+  </div>
+  <div style="width:100%; max-width:460px;">
+    <div id="accounts-list" style="display:flex; flex-direction:column;"></div>
+    <div id="accounts-add-zone"></div>
+  </div>
+</div>
+
+<!-- ===================== ECRAN 15 : MESSAGES ===================== -->
+<div class="screen" id="screen-messages">
+  <div class="app-header">
+    <h2 class="app-title">Messages</h2>
+  </div>
+  <div style="display:flex; gap:10px; margin-bottom:20px; width:100%; max-width:560px;">
+    <button class="contact-action" id="messages-tab-chats" style="flex:1;" onclick="switchMessagesTab('chats')">Discussions</button>
+    <button class="contact-action" id="messages-tab-requests" style="flex:1;" onclick="switchMessagesTab('requests')">Demandes de message</button>
+  </div>
+  <div id="messages-list" style="width:100%; max-width:560px; display:flex; flex-direction:column;"></div>
+</div>
+
+<!-- ===================== ECRAN 16 : CHAT ===================== -->
+<div class="screen" id="screen-chat" style="padding-bottom:100px;">
+  <div class="app-header" style="max-width:560px;">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <button class="nav-btn" style="opacity:1; width:36px; height:36px;" onclick="goTo('messages')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      </button>
+      <div class="avatar-sm" id="chat-header-avatar"></div>
+      <h2 class="app-title" id="chat-header-name" style="font-size:19px;">Membre</h2>
+    </div>
+  </div>
+  <div id="chat-accept-bar" style="display:none; width:100%; max-width:560px; gap:8px; margin-bottom:14px;">
+    <button class="contact-action" style="flex:1;" onclick="acceptConversation(activeConversationId)">Accepter la demande</button>
+    <button class="contact-action" style="flex:1; border-color:#D9707C; color:#D9707C;" onclick="declineConversation(activeConversationId)">Refuser</button>
+  </div>
+  <div id="chat-messages" style="width:100%; max-width:560px; flex:1; overflow-y:auto; padding:6px 2px;"></div>
+  <div class="comment-input-row" style="width:calc(100% - 40px); max-width:520px; position:fixed; bottom:74px; left:50%; transform:translateX(-50%); background:var(--noir-2); padding:10px 14px; border-radius:100px; border:1px solid var(--verre-bord); z-index:15;">
+    <input type="text" id="chat-input" placeholder="Écrire un message…" onkeypress="if(event.key==='Enter'){ sendChatMessage(); }">
+    <button class="contact-action" onclick="sendChatMessage()">Envoyer</button>
+  </div>
+</div>
+
 <!-- ===================== NAV BAR ===================== -->
 <div class="bottom-nav" id="bottom-nav" style="display:none;">
   <button class="nav-btn" id="nav-contacts" onclick="goTo('contacts')" title="Annuaire">
@@ -690,6 +742,9 @@
   </button>
   <button class="nav-btn" id="nav-join" onclick="goTo('join')" title="Groupe">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7Z"/></svg>
+  </button>
+  <button class="nav-btn" id="nav-messages" onclick="goTo('messages')" title="Messages">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z"/></svg>
   </button>
   <button class="nav-btn" id="nav-profile" onclick="goTo('profile')" title="Profil">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
@@ -769,9 +824,9 @@ function goTo(screen){
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + screen).classList.add('active');
   document.getElementById('bottom-nav').style.display = (screen==='welcome'||screen==='register'||screen==='confirm') ? 'none' : 'flex';
-  ['contacts','wall','solde','join','admin','videos','profile'].forEach(s=>{
+  ['contacts','wall','solde','join','admin','videos','profile','messages'].forEach(s=>{
     const el = document.getElementById('nav-'+s);
-    if(el) el.classList.toggle('active', s===screen);
+    if(el) el.classList.toggle('active', s===screen || (s==='messages' && screen==='chat'));
   });
   if(screen === 'contacts') renderContacts();
   if(screen === 'wall') renderWall();
@@ -780,6 +835,9 @@ function goTo(screen){
   if(screen === 'videos') renderVideos();
   if(screen === 'profile') renderProfile();
   if(screen === 'monetisation') renderMonetisation();
+  if(screen === 'accounts') renderAccounts();
+  if(screen === 'messages') renderMessages();
+  if(screen === 'chat') renderChat();
   window.scrollTo(0,0);
 }
 
@@ -832,6 +890,13 @@ async function submitRegistration(){
   const errorEl = document.getElementById('form-error');
   errorEl.style.display = 'none';
 
+  const existingAccounts = loadMyAccountsList();
+  if(existingAccounts.length >= 3 && !existingAccounts.includes(myId)){
+    errorEl.textContent = 'Limite de 3 comptes atteinte sur cet appareil.';
+    errorEl.style.display = 'block';
+    return;
+  }
+
   if(!pendingPhoto){ document.getElementById('photo-error').style.display='block'; ok=false; }
   if(!prenom || !nom || !age || !ville || !phone){
     errorEl.textContent = 'Merci de remplir tous les champs correctement.';
@@ -856,6 +921,12 @@ async function submitRegistration(){
   }
   myId = added.id;
   localStorage.setItem('myMemberId', myId);
+  const accounts = loadMyAccountsList();
+  if(!accounts.includes(myId)){
+    accounts.push(myId);
+    saveMyAccountsList(accounts);
+  }
+  addingAccount = false;
   updateAdminNavVisibility();
   document.getElementById('confirm-text').textContent = 'Bienvenue ' + prenom + ', vous êtes membre n°' + added.passengerNo + '.';
   goTo('confirm');
@@ -1223,7 +1294,7 @@ function renderVideos(){
         <video src="${v.videoData || v.link || ''}" controls playsinline></video>
       </div>
       <div class="video-actions">
-        <button class="${iLiked?'liked':''}" onclick="toggleLike('${v.id}')">🤍 ${likes.length}</button>
+        <button class="${iLiked?'liked':''}" onclick="toggleLike('${v.id}')">❤️ ${likes.length}</button>
         <button onclick="focusComment('${v.id}')">💬 ${comments.length}</button>
         <button onclick="shareVideo('${v.id}')">↗ Partager</button>
       </div>
