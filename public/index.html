@@ -402,6 +402,16 @@
     position:absolute; bottom:6px; left:6px; font-size:11px; color:#fff;
     background:rgba(0,0,0,0.5); padding:2px 8px; border-radius:100px;
   }
+
+  /* ---------- PREUVE GROUPE ---------- */
+  .proof-status{
+    display:inline-block; font-size:11px; font-weight:600; letter-spacing:.05em;
+    text-transform:uppercase; padding:5px 12px; border-radius:100px; margin-bottom:14px;
+  }
+  .proof-status.pending{ background:rgba(201,162,75,0.15); color:var(--or-clair); }
+  .proof-status.approved{ background:rgba(74,158,255,0.15); color:var(--bleu-verif); }
+  .proof-status.rejected{ background:rgba(217,112,124,0.15); color:#D9707C; }
+  .proof-thumb{ width:100%; max-width:220px; border-radius:10px; margin:10px 0; display:block; }
 </style>
 </head>
 <body>
@@ -540,7 +550,11 @@
 <!-- ===================== ECRAN 8 : ADMIN (visible seulement si certifié) ===================== -->
 <div class="screen" id="screen-admin">
   <div class="app-header">
-    <h2 class="app-title">Demandes de retrait</h2>
+    <h2 class="app-title">Administration</h2>
+  </div>
+  <div style="display:flex; gap:10px; margin-bottom:20px; width:100%; max-width:520px;">
+    <button class="contact-action" id="admin-tab-withdrawals" style="flex:1;" onclick="switchAdminTab('withdrawals')">Retraits</button>
+    <button class="contact-action" id="admin-tab-proofs" style="flex:1;" onclick="switchAdminTab('proofs')">Preuves groupe</button>
   </div>
   <div id="admin-list" style="width:100%; display:flex; flex-direction:column; align-items:center; max-width:520px;"></div>
 </div>
@@ -617,11 +631,7 @@
     <div class="hint" style="margin-bottom:18px;">Trois conditions pour débloquer les retraits.</div>
     <div id="mon-conditions"></div>
     <div class="mcard-divider" style="margin:20px 0;"></div>
-    <div class="field">
-      <label>Membres ajoutés au groupe WhatsApp</label>
-      <input type="number" id="m-group-count" placeholder="0" min="0">
-    </div>
-    <button class="upload-btn" style="margin-bottom:20px;" onclick="saveGroupCount()">Enregistrer</button>
+    <div id="group-proof-zone"></div>
     <div class="mcard-divider" style="margin:8px 0 20px;"></div>
     <div class="field">
       <label>Demander un retrait (max 50 000 F)</label>
@@ -979,6 +989,9 @@ async function renderAdmin(){
     list.innerHTML = '<div class="empty-state">Accès non autorisé.</div>';
     return;
   }
+  document.getElementById('admin-tab-withdrawals').style.opacity = adminTab === 'withdrawals' ? '1' : '.5';
+  document.getElementById('admin-tab-proofs').style.opacity = adminTab === 'proofs' ? '1' : '.5';
+  if(adminTab === 'proofs'){ renderAdminProofs(); return; }
   try{
     const res = await fetch('/api/withdrawals?requesterId=' + myId);
     if(!res.ok){ list.innerHTML = '<div class="empty-state">Accès non autorisé.</div>'; return; }
@@ -1076,7 +1089,12 @@ async function submitVideo(){
       registerVideoPostedToday();
       goTo('videos');
     } else {
-      errorEl.textContent = 'Erreur à la publication, réessaie.';
+      let detail = 'code ' + res.status;
+      try{
+        const data = await res.json();
+        if(data && data.error) detail = data.error;
+      }catch(e){}
+      errorEl.textContent = 'Erreur à la publication (' + detail + '). Vidéo probablement trop lourde pour le serveur.';
       errorEl.style.display = 'block';
     }
   }catch(e){
@@ -1228,25 +1246,132 @@ function registerVideoPostedToday(){
   localStorage.setItem('videosToday_'+myId, JSON.stringify({ date: today, count }));
 }
 
-function getGroupCount(){
-  return parseInt(localStorage.getItem('groupCount_'+myId) || '0', 10);
+/* ================== PREUVE D'AJOUT AU GROUPE ================== */
+let pendingProofPhoto = null;
+
+function handleProofPhoto(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    const img = new Image();
+    img.onload = function(){
+      const canvas = document.createElement('canvas');
+      const maxDim = 700;
+      let w = img.width, h = img.height;
+      if(w > h && w > maxDim){ h = h*(maxDim/w); w = maxDim; }
+      else if(h > maxDim){ w = w*(maxDim/h); h = maxDim; }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      pendingProofPhoto = canvas.toDataURL('image/jpeg', 0.7);
+      renderGroupProofZone();
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
 }
 
-function saveGroupCount(){
-  const val = parseInt(document.getElementById('m-group-count').value, 10) || 0;
-  localStorage.setItem('groupCount_'+myId, String(val));
-  renderMonetisation();
+async function submitGroupProof(){
+  if(!pendingProofPhoto) return;
+  try{
+    const res = await fetch('/api/members/' + myId + '/group-proof', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ photo: pendingProofPhoto })
+    });
+    if(res.ok){
+      const data = await res.json();
+      members = data.members;
+      pendingProofPhoto = null;
+      renderGroupProofZone();
+    }
+  }catch(e){ console.error(e); }
+}
+
+function renderGroupProofZone(){
+  const zone = document.getElementById('group-proof-zone');
+  if(!zone) return;
+  const me = members.find(m => m.id === myId);
+  const status = me ? (me.groupProofStatus || 'none') : 'none';
+
+  let statusHtml = '';
+  if(status === 'pending') statusHtml = '<span class="proof-status pending">En attente de vérification</span>';
+  if(status === 'approved') statusHtml = '<span class="proof-status approved">Validé ✓</span>';
+  if(status === 'rejected') statusHtml = '<span class="proof-status rejected">Refusé — renvoie une capture claire</span>';
+
+  zone.innerHTML = `
+    <label style="display:block; font-size:11px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--or); margin-bottom:8px;">
+      Preuve d'ajout au groupe WhatsApp
+    </label>
+    <div class="hint" style="margin:0 0 12px;">Capture d'écran montrant les membres que tu as ajoutés (liste des participants du groupe). Un membre certifié vérifie et valide.</div>
+    ${statusHtml}
+    ${pendingProofPhoto ? '<img class="proof-thumb" src="'+pendingProofPhoto+'">' : (me && me.groupProofPhoto ? '<img class="proof-thumb" src="'+me.groupProofPhoto+'">' : '')}
+    <div style="margin-bottom:16px;">
+      <label class="upload-btn" for="proof-input">${status === 'approved' ? 'Remplacer la capture' : 'Choisir une capture d\\'écran'}</label>
+      <input type="file" id="proof-input" accept="image/*" style="display:none;" onchange="handleProofPhoto(event)">
+    </div>
+    <button class="btn-primary" style="width:100%; margin-bottom:20px;" onclick="submitGroupProof()" ${pendingProofPhoto ? '' : 'disabled'}>Envoyer pour vérification</button>
+  `;
+}
+
+/* ================== ADMIN : ONGLETS ================== */
+let adminTab = 'withdrawals';
+
+function switchAdminTab(tab){
+  adminTab = tab;
+  document.getElementById('admin-tab-withdrawals').style.opacity = tab === 'withdrawals' ? '1' : '.5';
+  document.getElementById('admin-tab-proofs').style.opacity = tab === 'proofs' ? '1' : '.5';
+  renderAdmin();
+}
+
+async function renderAdminProofs(){
+  const list = document.getElementById('admin-list');
+  try{
+    const res = await fetch('/api/group-proofs?requesterId=' + myId);
+    if(!res.ok){ list.innerHTML = '<div class="empty-state">Accès non autorisé.</div>'; return; }
+    const proofs = await res.json();
+    if(proofs.length === 0){
+      list.innerHTML = '<div class="empty-state">Aucune preuve en attente.</div>';
+      return;
+    }
+    list.innerHTML = proofs.map(p => `
+      <div class="contact-row" style="flex-direction:column; align-items:stretch; gap:10px;">
+        <div class="contact-name">${escapeHtml(p.prenom)} ${escapeHtml(p.nom)}</div>
+        <img class="proof-thumb" src="${p.photo}">
+        <div style="display:flex; gap:8px;">
+          <button class="contact-action" style="flex:1;" onclick="reviewGroupProof('${p.id}', true)">Valider</button>
+          <button class="contact-action" style="flex:1; border-color:#D9707C; color:#D9707C;" onclick="reviewGroupProof('${p.id}', false)">Refuser</button>
+        </div>
+      </div>
+    `).join('');
+  }catch(e){
+    list.innerHTML = '<div class="empty-state">Erreur de chargement.</div>';
+  }
+}
+
+async function reviewGroupProof(memberId, approve){
+  try{
+    const res = await fetch('/api/members/' + memberId + '/group-proof/review', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ requesterId: myId, approve })
+    });
+    if(res.ok){
+      const data = await res.json();
+      members = data.members;
+      renderAdminProofs();
+    }
+  }catch(e){ console.error(e); }
 }
 
 function renderMonetisation(){
   const container = document.getElementById('mon-conditions');
   const me = members.find(m => m.id === myId);
-  const groupCount = getGroupCount();
   const videosToday = getVideosToday();
-  document.getElementById('m-group-count').value = groupCount || '';
+  const groupApproved = !!(me && me.groupProofStatus === 'approved');
 
   const conditions = [
-    { done: groupCount >= 20, label: 'Ajouter au moins 20 membres dans le groupe WhatsApp', sub: groupCount+' / 20 déclarés' },
+    { done: groupApproved, label: 'Ajouter au moins 20 membres dans le groupe WhatsApp', sub: groupApproved ? 'Preuve validée' : 'Preuve requise, voir ci-dessous' },
     { done: videosToday >= 5, label: 'Publier au moins 5 à 6 vidéos par jour', sub: videosToday+' publiée(s) aujourd\'hui' },
     { done: !!(me && me.verified), label: 'Être vérifié (pas obligatoire, mais recommandé)', sub: me && me.verified ? 'Compte vérifié' : 'Pas encore vérifié' }
   ];
@@ -1257,6 +1382,8 @@ function renderMonetisation(){
       <div class="cond-text">${c.label}<small>${c.sub}</small></div>
     </div>
   `).join('');
+
+  renderGroupProofZone();
 }
 
 async function requestWithdrawalFromMonetisation(){
