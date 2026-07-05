@@ -521,20 +521,37 @@
 <!-- ===================== ECRAN 7 : SOLDE ===================== -->
 <div class="screen" id="screen-solde">
   <div class="app-header">
-    <h2 class="app-title">Mon solde</h2>
+    <h2 class="app-title">Mon solde🏦</h2>
   </div>
   <div class="card-panel" style="max-width:460px;">
     <div class="hint" style="margin-bottom:16px;">Ton lien de parrainage — chaque personne qui s'inscrit via ce lien compte pour toi.</div>
     <div class="field">
       <input type="text" id="referral-link" readonly style="font-size:12.5px;">
     </div>
-    <button class="upload-btn" style="margin-bottom:20px;" onclick="copyReferralLink()">Copier le lien</button>
+    <button class="upload-btn" style="margin-bottom:20px;" onclick="copyReferralLink()">Copier le lien📩</button>
 
     <div class="mcard-divider"></div>
     <div class="mcard-meta" style="margin:16px 0; font-size:14px;">
+      <div>Solde disponible : <b id="stat-balance">0</b> F</div>
       <div>Membres ajoutés : <b id="stat-referrals">0</b></div>
       <div>Vidéos publiées : <b id="stat-videos">0</b></div>
       <div>Likes reçus : <b id="stat-likes">0</b></div>
+    </div>
+
+    <div class="hint" id="withdraw-conditions-warning" style="display:none; color:#D9707C; opacity:.9;">Tu dois d'abord remplir les conditions de monétisation (voir Paramètres → Monétisation) avant de pouvoir retirer.</div>
+
+    <div class="field">
+      <label>Moyen de paiement</label>
+      <select id="withdraw-method" onchange="updatePaymentLogo('withdraw')">
+        <option value="wave">Wave</option>
+        <option value="mtn">MTN Mobile Money</option>
+      </select>
+    </div>
+    <div id="withdraw-method-logo" style="margin:-6px 0 16px;"></div>
+
+    <div class="field">
+      <label>Numéro <span id="withdraw-method-label-tag">Wave</span></label>
+      <input type="tel" id="withdraw-payment-number" placeholder="34700000000">
     </div>
 
     <div class="field">
@@ -542,8 +559,8 @@
       <input type="number" id="withdraw-amount" placeholder="10000" min="1" max="50000">
     </div>
     <div class="form-error" id="withdraw-error">Montant invalide.</div>
-    <div class="hint" id="withdraw-success" style="display:none; color:var(--or-clair);">Demande envoyée — elle sera traitée manuellement via Wave.</div>
-    <button class="btn-primary" style="width:100%;" onclick="requestWithdrawal()">Demander un retrait</button>
+    <div class="hint" id="withdraw-success" style="display:none; color:var(--or-clair);">Demande de retrait envoyée </div>
+    <button class="btn-primary" id="withdraw-submit-btn" style="width:100%;" onclick="requestWithdrawal()">Demander un retrait</button>
   </div>
 </div>
 
@@ -603,7 +620,7 @@
 <!-- ===================== ECRAN 12 : PARAMETRES ===================== -->
 <div class="screen" id="screen-settings">
   <div class="app-header">
-    <h2 class="app-title">Paramètres</h2>
+    <h2 class="app-title">⚙️Paramètres</h2>
   </div>
   <div style="width:100%; max-width:460px;">
     <div class="contact-row" style="cursor:pointer;" onclick="goTo('monetisation')">
@@ -633,13 +650,27 @@
     <div class="mcard-divider" style="margin:20px 0;"></div>
     <div id="group-proof-zone"></div>
     <div class="mcard-divider" style="margin:8px 0 20px;"></div>
+    <div class="mcard-meta" style="margin:0 0 16px; font-size:14px;">Solde disponible : <b id="m-stat-balance">0</b> F</div>
+    <div class="hint" id="m-withdraw-conditions-warning" style="display:none; color:#D9707C; opacity:.9;">Tu dois d'abord remplir les 2 premières conditions ci-dessus avant de pouvoir retirer.</div>
+    <div class="field">
+      <label>Moyen de paiement</label>
+      <select id="m-withdraw-method" onchange="updatePaymentLogo('m-withdraw')">
+        <option value="wave">Wave</option>
+        <option value="mtn">MTN Mobile Money</option>
+      </select>
+    </div>
+    <div id="m-withdraw-method-logo" style="margin:-6px 0 16px;"></div>
+    <div class="field">
+      <label>Numéro <span id="m-withdraw-method-label-tag">Wave</span></label>
+      <input type="tel" id="m-withdraw-payment-number" placeholder="+225 07 00 00 00 00">
+    </div>
     <div class="field">
       <label>Demander un retrait (max 50 000 F)</label>
       <input type="number" id="m-withdraw-amount" placeholder="10000" min="1" max="50000">
     </div>
     <div class="form-error" id="m-withdraw-error">Montant invalide.</div>
-    <div class="hint" id="m-withdraw-success" style="display:none; color:var(--or-clair);">Demande envoyée — elle sera traitée manuellement via Wave.</div>
-    <button class="btn-primary" style="width:100%;" onclick="requestWithdrawalFromMonetisation()">Demander un retrait</button>
+    <div class="hint" id="m-withdraw-success" style="display:none; color:var(--or-clair);">Demande envoyée — elle sera traitée manuellement.</div>
+    <button class="btn-primary" id="m-withdraw-submit-btn" style="width:100%;" onclick="requestWithdrawalFromMonetisation()">Demander un retrait</button>
   </div>
 </div>
 
@@ -931,6 +962,37 @@ function escapeHtml(str){
   return d.innerHTML;
 }
 
+/* ================== PAIEMENT : LOGOS ================== */
+function paymentLogoHTML(method){
+  if(method === 'mtn'){
+    return `<div style="display:flex; align-items:center; gap:9px; padding:9px 12px; border-radius:8px; background:rgba(255,204,0,0.12); border:1px solid rgba(255,204,0,0.35);">
+      <svg width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#FFCC00"/><text x="12" y="15" font-family="Inter, sans-serif" font-size="7.5" font-weight="800" text-anchor="middle" fill="#000">MTN</text></svg>
+      <span style="font-size:12.5px; font-weight:600; color:#ffe17a;">MTN Mobile Money</span>
+    </div>`;
+  }
+  return `<div style="display:flex; align-items:center; gap:9px; padding:9px 12px; border-radius:8px; background:rgba(30,144,255,0.1); border:1px solid rgba(30,144,255,0.3);">
+    <svg width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#1E90FF"/><path d="M4.5 13c1.1-3 1.9-3 3-0.2 1.1 2.8 1.9 2.8 3-0.1 1.1-2.8 1.9-2.8 3 0 1.1 2.6 1.9 2.6 2.9 0" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+    <span style="font-size:12.5px; font-weight:600; color:#8ec9ff;">Wave</span>
+  </div>`;
+}
+
+function updatePaymentLogo(prefix){
+  const select = document.getElementById(prefix + '-method');
+  const logoZone = document.getElementById(prefix + '-method-logo');
+  const labelTag = document.getElementById(prefix + '-method-label-tag');
+  if(!select || !logoZone) return;
+  logoZone.innerHTML = paymentLogoHTML(select.value);
+  if(labelTag) labelTag.textContent = select.value === 'mtn' ? 'MTN' : 'Wave';
+}
+
+/* ================== CONDITIONS DE RETRAIT ================== */
+function conditionsMet(me){
+  if(!me) return false;
+  const groupApproved = me.groupProofStatus === 'approved';
+  const videosOk = getVideosToday() >= 5;
+  return groupApproved && videosOk;
+}
+
 /* ================== SOLDE / RETRAIT ================== */
 function renderSolde(){
   const me = members.find(m => m.id === myId);
@@ -939,8 +1001,18 @@ function renderSolde(){
   document.getElementById('stat-referrals').textContent = me.referralCount || 0;
   document.getElementById('stat-videos').textContent = me.videosCount || 0;
   document.getElementById('stat-likes').textContent = me.likesCount || 0;
+  document.getElementById('stat-balance').textContent = (me.balance || 0).toLocaleString();
   document.getElementById('withdraw-error').style.display = 'none';
   document.getElementById('withdraw-success').style.display = 'none';
+
+  const ok = conditionsMet(me);
+  document.getElementById('withdraw-conditions-warning').style.display = ok ? 'none' : 'block';
+  const btn = document.getElementById('withdraw-submit-btn');
+  btn.disabled = !ok;
+  btn.style.opacity = ok ? '1' : '.45';
+  btn.style.cursor = ok ? 'pointer' : 'not-allowed';
+
+  updatePaymentLogo('withdraw');
 }
 
 function copyReferralLink(){
@@ -950,22 +1022,50 @@ function copyReferralLink(){
 }
 
 async function requestWithdrawal(){
-  const amount = parseInt(document.getElementById('withdraw-amount').value, 10);
+  const me = members.find(m => m.id === myId);
   const errorEl = document.getElementById('withdraw-error');
   const successEl = document.getElementById('withdraw-success');
   errorEl.style.display = 'none';
   successEl.style.display = 'none';
 
+  if(!conditionsMet(me)){
+    errorEl.textContent = "Tu dois d'abord remplir les conditions de monétisation avant de pouvoir retirer.";
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  const balance = (me && me.balance) || 0;
+  if(balance <= 0){
+    errorEl.textContent = 'Ton solde est vide, tu ne peux pas encore faire de retrait.';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  const amount = parseInt(document.getElementById('withdraw-amount').value, 10);
   if(!amount || amount <= 0 || amount > 50000){
     errorEl.textContent = 'Montant invalide (entre 1 et 50 000 F).';
     errorEl.style.display = 'block';
     return;
   }
+  if(amount > balance){
+    errorEl.textContent = 'Tu ne peux pas retirer plus que ton solde disponible (' + balance.toLocaleString() + ' F).';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  const paymentMethod = document.getElementById('withdraw-method').value;
+  const paymentNumber = document.getElementById('withdraw-payment-number').value.trim();
+  if(!paymentNumber){
+    errorEl.textContent = 'Indique ton numéro ' + (paymentMethod === 'mtn' ? 'MTN Mobile Money' : 'Wave') + '.';
+    errorEl.style.display = 'block';
+    return;
+  }
+
   try{
     const res = await fetch('/api/withdrawals', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ memberId: myId, amount })
+      body: JSON.stringify({ memberId: myId, amount, paymentMethod, paymentNumber })
     });
     if(res.ok){
       successEl.style.display = 'block';
@@ -1003,7 +1103,8 @@ async function renderAdmin(){
     list.innerHTML = requests.map(r => `
       <div class="contact-row" style="flex-direction:column; align-items:stretch; gap:10px;">
         <div class="contact-name">${escapeHtml(r.prenom)} ${escapeHtml(r.nom)} — ${r.amount.toLocaleString()} F</div>
-        <div class="contact-phone">Wave : ${escapeHtml(r.phone)}</div>
+        ${paymentLogoHTML(r.paymentMethod || 'wave')}
+        <div class="contact-phone">Numéro : ${escapeHtml(r.paymentNumber || r.phone)}</div>
         <div class="contact-phone">Parrainages : ${r.referralCount} · Vidéos : ${r.videosCount} · Likes : ${r.likesCount}</div>
         <button class="contact-action" onclick="markPaid('${r.id}')">Marquer payé</button>
       </div>
@@ -1307,7 +1408,7 @@ function renderGroupProofZone(){
     ${statusHtml}
     ${pendingProofPhoto ? '<img class="proof-thumb" src="'+pendingProofPhoto+'">' : (me && me.groupProofPhoto ? '<img class="proof-thumb" src="'+me.groupProofPhoto+'">' : '')}
     <div style="margin-bottom:16px;">
-      <label class="upload-btn" for="proof-input">${status === 'approved' ? 'Remplacer la capture' : 'Choisir une capture d\\'écran'}</label>
+      <label class="upload-btn" for="proof-input">${status === 'approved' ? 'Remplacer la capture' : 'Choisir une capture d\'écran'}</label>
       <input type="file" id="proof-input" accept="image/*" style="display:none;" onchange="handleProofPhoto(event)">
     </div>
     <button class="btn-primary" style="width:100%; margin-bottom:20px;" onclick="submitGroupProof()" ${pendingProofPhoto ? '' : 'disabled'}>Envoyer pour vérification</button>
@@ -1384,24 +1485,66 @@ function renderMonetisation(){
   `).join('');
 
   renderGroupProofZone();
+
+  document.getElementById('m-stat-balance').textContent = ((me && me.balance) || 0).toLocaleString();
+  document.getElementById('m-withdraw-error').style.display = 'none';
+  document.getElementById('m-withdraw-success').style.display = 'none';
+
+  const ok = conditionsMet(me);
+  document.getElementById('m-withdraw-conditions-warning').style.display = ok ? 'none' : 'block';
+  const mBtn = document.getElementById('m-withdraw-submit-btn');
+  mBtn.disabled = !ok;
+  mBtn.style.opacity = ok ? '1' : '.45';
+  mBtn.style.cursor = ok ? 'pointer' : 'not-allowed';
+
+  updatePaymentLogo('m-withdraw');
 }
 
 async function requestWithdrawalFromMonetisation(){
-  const amount = parseInt(document.getElementById('m-withdraw-amount').value, 10);
+  const me = members.find(m => m.id === myId);
   const errorEl = document.getElementById('m-withdraw-error');
   const successEl = document.getElementById('m-withdraw-success');
   errorEl.style.display = 'none';
   successEl.style.display = 'none';
+
+  if(!conditionsMet(me)){
+    errorEl.textContent = "Tu dois d'abord remplir les conditions de monétisation avant de pouvoir retirer.";
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  const balance = (me && me.balance) || 0;
+  if(balance <= 0){
+    errorEl.textContent = 'Ton solde est vide, tu ne peux pas encore faire de retrait.';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  const amount = parseInt(document.getElementById('m-withdraw-amount').value, 10);
   if(!amount || amount <= 0 || amount > 50000){
     errorEl.textContent = 'Montant invalide (entre 1 et 50 000 F).';
     errorEl.style.display = 'block';
     return;
   }
+  if(amount > balance){
+    errorEl.textContent = 'Tu ne peux pas retirer plus que ton solde disponible (' + balance.toLocaleString() + ' F).';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  const paymentMethod = document.getElementById('m-withdraw-method').value;
+  const paymentNumber = document.getElementById('m-withdraw-payment-number').value.trim();
+  if(!paymentNumber){
+    errorEl.textContent = 'Indique ton numéro ' + (paymentMethod === 'mtn' ? 'MTN Mobile Money' : 'Wave') + '.';
+    errorEl.style.display = 'block';
+    return;
+  }
+
   try{
     const res = await fetch('/api/withdrawals', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ memberId: myId, amount })
+      body: JSON.stringify({ memberId: myId, amount, paymentMethod, paymentNumber })
     });
     if(res.ok){
       successEl.style.display = 'block';
