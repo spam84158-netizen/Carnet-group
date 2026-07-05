@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title> Sunset com</title>
+<title> Sunset.com</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Sacramento&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -357,9 +357,65 @@
     padding:8px 14px; border-radius:100px; font-size:12px; font-weight:600;
   }
   .video-actions button.liked{ border-color:var(--or); color:var(--or-clair); }
-  .comment-list{ margin-top:12px; display:flex; flex-direction:column; gap:8px; }
-  .comment-item{ font-size:12.5px; opacity:.75; }
-  .comment-item b{ opacity:1; color:var(--or-clair); }
+  .video-actions button.saved{ border-color:var(--bleu-verif); color:var(--bleu-verif); }
+  .video-actions button.reposted{ border-color:#7BC67E; color:#7BC67E; }
+
+  /* ---------- ONGLETS VIDEOS ---------- */
+  .video-tabs{ display:flex; gap:8px; margin-bottom:18px; width:100%; max-width:560px; }
+  .video-tab{
+    flex:1; background:transparent; border:1px solid var(--verre-bord); color:var(--creme);
+    opacity:.5; padding:9px 6px; border-radius:100px; font-size:12px; font-weight:600;
+    letter-spacing:.03em;
+  }
+  .video-tab.active{ opacity:1; border-color:var(--or); color:var(--or-clair); }
+  .repost-tag{
+    font-size:11px; color:var(--or); opacity:.8; margin-bottom:6px; display:flex; align-items:center; gap:5px;
+  }
+
+  /* ---------- MENU ... ---------- */
+  .menu-dots-btn{
+    background:transparent; border:none; color:var(--creme); opacity:.6;
+    font-size:18px; padding:6px 10px; line-height:1;
+  }
+  .menu-overlay{
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:50;
+    align-items:flex-end; justify-content:center;
+  }
+  .menu-overlay.active{ display:flex; }
+  .menu-sheet{
+    width:100%; max-width:480px; background:var(--noir-2); border:1px solid var(--verre-bord);
+    border-radius:18px 18px 0 0; padding:10px 0 calc(10px + env(safe-area-inset-bottom));
+    animation:fadeIn .2s ease;
+  }
+  .menu-item{
+    width:100%; background:transparent; border:none; color:var(--creme);
+    padding:15px 24px; text-align:left; font-size:14.5px; display:flex; align-items:center; gap:12px;
+  }
+  .menu-item.danger{ color:#D9707C; }
+  .menu-item + .menu-item{ border-top:1px solid var(--verre-bord); }
+  .comment-list{ margin-top:12px; display:flex; flex-direction:column; gap:10px; }
+  .comment-item{
+    display:flex; gap:10px; align-items:flex-start;
+  }
+  .comment-avatar{
+    width:28px; height:28px; border-radius:50%; flex-shrink:0;
+    background:rgba(255,255,255,0.06); border:1px solid var(--verre-bord);
+    display:flex; align-items:center; justify-content:center;
+    overflow:hidden; font-family:'Cormorant Garamond'; font-weight:600; color:var(--or-clair); font-size:12px;
+  }
+  .comment-avatar img{ width:100%; height:100%; object-fit:cover; }
+  .comment-bubble{
+    background:rgba(255,255,255,0.04); border:1px solid var(--verre-bord);
+    border-radius:14px 14px 14px 3px; padding:8px 12px; flex:1; min-width:0;
+  }
+  .comment-bubble-top{ display:flex; align-items:baseline; justify-content:space-between; gap:8px; }
+  .comment-author{ font-size:12px; font-weight:600; color:var(--or-clair); }
+  .comment-time{ font-size:10px; opacity:.4; white-space:nowrap; }
+  .comment-text{ font-size:13px; opacity:.9; margin-top:2px; word-wrap:break-word; }
+  .comment-delete{
+    background:transparent; border:none; color:#D9707C; opacity:.6;
+    font-size:11px; margin-top:4px; padding:0;
+  }
   .comment-input-row{ display:flex; gap:8px; margin-top:10px; }
   .comment-input-row input{
     flex:1; padding:10px 12px; border-radius:100px; border:1px solid var(--verre-bord);
@@ -532,26 +588,9 @@
 
     <div class="mcard-divider"></div>
     <div class="mcard-meta" style="margin:16px 0; font-size:14px;">
-      <div>Solde disponible : <b id="stat-balance">0</b> F</div>
       <div>Membres ajoutés : <b id="stat-referrals">0</b></div>
       <div>Vidéos publiées : <b id="stat-videos">0</b></div>
       <div>Likes reçus : <b id="stat-likes">0</b></div>
-    </div>
-
-    <div class="hint" id="withdraw-conditions-warning" style="display:none; color:#D9707C; opacity:.9;">Tu dois d'abord remplir les conditions de monétisation (voir Paramètres → Monétisation) avant de pouvoir retirer.</div>
-
-    <div class="field">
-      <label>Moyen de paiement</label>
-      <select id="withdraw-method" onchange="updatePaymentLogo('withdraw')">
-        <option value="wave">Wave</option>
-        <option value="mtn">MTN Mobile Money</option>
-      </select>
-    </div>
-    <div id="withdraw-method-logo" style="margin:-6px 0 16px;"></div>
-
-    <div class="field">
-      <label>Numéro <span id="withdraw-method-label-tag">Wave</span></label>
-      <input type="tel" id="withdraw-payment-number" placeholder="+225 07 00 00 00 00">
     </div>
 
     <div class="field">
@@ -559,8 +598,8 @@
       <input type="number" id="withdraw-amount" placeholder="10000" min="1" max="50000">
     </div>
     <div class="form-error" id="withdraw-error">Montant invalide.</div>
-    <div class="hint" id="withdraw-success" style="display:none; color:var(--or-clair);">Demande envoyée — elle sera traitée manuellement.</div>
-    <button class="btn-primary" id="withdraw-submit-btn" style="width:100%;" onclick="requestWithdrawal()">Demander un retrait</button>
+    <div class="hint" id="withdraw-success" style="display:none; color:var(--or-clair);">Demande envoyée — elle sera traitée manuellement via Wave.</div>
+    <button class="btn-primary" style="width:100%;" onclick="requestWithdrawal()">Demander un retrait</button>
   </div>
 </div>
 
@@ -582,7 +621,23 @@
     <h2 class="app-title">Vidéos</h2>
     <button class="contact-action" onclick="goTo('post-video')">+ Publier</button>
   </div>
+  <div class="video-tabs">
+    <button class="video-tab" id="tab-foryou" onclick="switchVideoTab('foryou')">Pour toi</button>
+    <button class="video-tab" id="tab-following" onclick="switchVideoTab('following')">Abonnements</button>
+    <button class="video-tab" id="tab-favorites" onclick="switchVideoTab('favorites')">Favoris</button>
+  </div>
   <div id="videos-list" style="width:100%; display:flex; flex-direction:column; align-items:center; max-width:560px;"></div>
+</div>
+
+<!-- ===================== MENU ... (VIDEO) ===================== -->
+<div class="menu-overlay" id="menu-overlay" onclick="closeVideoMenu(event)">
+  <div class="menu-sheet" onclick="event.stopPropagation()">
+    <button class="menu-item" id="menu-favorite" onclick="menuAction('favorite')">🔖 <span id="menu-favorite-label">Mettre en favori</span></button>
+    <button class="menu-item" id="menu-repost" onclick="menuAction('repost')">🔁 <span id="menu-repost-label">Republier</span></button>
+    <button class="menu-item" onclick="menuAction('copylink')">🔗 Copier le lien</button>
+    <button class="menu-item" onclick="menuAction('share')">↗ Partager</button>
+    <button class="menu-item danger" id="menu-delete" onclick="menuAction('delete')" style="display:none;">🗑 Supprimer la vidéo</button>
+  </div>
 </div>
 
 <!-- ===================== ECRAN 10 : PUBLIER UNE VIDEO ===================== -->
@@ -623,17 +678,17 @@
     <h2 class="app-title">Paramètres</h2>
   </div>
   <div style="width:100%; max-width:460px;">
+    <div class="contact-row" style="cursor:pointer;" onclick="goTo('accounts')">
+      <div class="contact-info">
+        <div class="contact-name">Comptes</div>
+        <div class="contact-phone">Changer de compte ou en ajouter un</div>
+      </div>
+      <span class="contact-action">Ouvrir</span>
+    </div>
     <div class="contact-row" style="cursor:pointer;" onclick="goTo('monetisation')">
       <div class="contact-info">
         <div class="contact-name">Monétisation</div>
         <div class="contact-phone">Conditions et demande de retrait</div>
-      </div>
-      <span class="contact-action">Ouvrir</span>
-    </div>
-    <div class="contact-row" style="cursor:pointer;" onclick="goTo('accounts')">
-      <div class="contact-info">
-        <div class="contact-name">Mes comptes</div>
-        <div class="contact-phone">Gérer jusqu'à 3 comptes sur cet appareil</div>
       </div>
       <span class="contact-action">Ouvrir</span>
     </div>
@@ -644,9 +699,19 @@
       <span class="contact-action">Ouvrir</span>
     </div>
   </div>
+
 </div>
 
 <!-- ===================== ECRAN 13 : MONETISATION ===================== -->
+<!-- ===================== ECRAN : MES COMPTES ===================== -->
+<div class="screen" id="screen-accounts">
+  <div class="app-header">
+    <h2 class="app-title">Mes comptes</h2>
+  </div>
+  <div id="accounts-list" style="width:100%; max-width:460px;"></div>
+  <button class="btn-primary" style="margin-top:20px;" onclick="startNewAccount()">+ Ajouter un compte</button>
+</div>
+
 <div class="screen" id="screen-monetisation">
   <div class="app-header">
     <h2 class="app-title">Monétisation</h2>
@@ -657,72 +722,13 @@
     <div class="mcard-divider" style="margin:20px 0;"></div>
     <div id="group-proof-zone"></div>
     <div class="mcard-divider" style="margin:8px 0 20px;"></div>
-    <div class="mcard-meta" style="margin:0 0 16px; font-size:14px;">Solde disponible : <b id="m-stat-balance">0</b> F</div>
-    <div class="hint" id="m-withdraw-conditions-warning" style="display:none; color:#D9707C; opacity:.9;">Tu dois d'abord remplir les 2 premières conditions ci-dessus avant de pouvoir retirer.</div>
-    <div class="field">
-      <label>Moyen de paiement</label>
-      <select id="m-withdraw-method" onchange="updatePaymentLogo('m-withdraw')">
-        <option value="wave">Wave</option>
-        <option value="mtn">MTN Mobile Money</option>
-      </select>
-    </div>
-    <div id="m-withdraw-method-logo" style="margin:-6px 0 16px;"></div>
-    <div class="field">
-      <label>Numéro <span id="m-withdraw-method-label-tag">Wave</span></label>
-      <input type="tel" id="m-withdraw-payment-number" placeholder="+225 07 00 00 00 00">
-    </div>
     <div class="field">
       <label>Demander un retrait (max 50 000 F)</label>
       <input type="number" id="m-withdraw-amount" placeholder="10000" min="1" max="50000">
     </div>
     <div class="form-error" id="m-withdraw-error">Montant invalide.</div>
-    <div class="hint" id="m-withdraw-success" style="display:none; color:var(--or-clair);">Demande envoyée — elle sera traitée manuellement.</div>
-    <button class="btn-primary" id="m-withdraw-submit-btn" style="width:100%;" onclick="requestWithdrawalFromMonetisation()">Demander un retrait</button>
-  </div>
-</div>
-
-<!-- ===================== ECRAN 14 : MES COMPTES ===================== -->
-<div class="screen" id="screen-accounts">
-  <div class="app-header">
-    <h2 class="app-title">Mes comptes</h2>
-  </div>
-  <div style="width:100%; max-width:460px;">
-    <div id="accounts-list" style="display:flex; flex-direction:column;"></div>
-    <div id="accounts-add-zone"></div>
-  </div>
-</div>
-
-<!-- ===================== ECRAN 15 : MESSAGES ===================== -->
-<div class="screen" id="screen-messages">
-  <div class="app-header">
-    <h2 class="app-title">Messages</h2>
-  </div>
-  <div style="display:flex; gap:10px; margin-bottom:20px; width:100%; max-width:560px;">
-    <button class="contact-action" id="messages-tab-chats" style="flex:1;" onclick="switchMessagesTab('chats')">Discussions</button>
-    <button class="contact-action" id="messages-tab-requests" style="flex:1;" onclick="switchMessagesTab('requests')">Demandes de message</button>
-  </div>
-  <div id="messages-list" style="width:100%; max-width:560px; display:flex; flex-direction:column;"></div>
-</div>
-
-<!-- ===================== ECRAN 16 : CHAT ===================== -->
-<div class="screen" id="screen-chat" style="padding-bottom:100px;">
-  <div class="app-header" style="max-width:560px;">
-    <div style="display:flex; align-items:center; gap:12px;">
-      <button class="nav-btn" style="opacity:1; width:36px; height:36px;" onclick="goTo('messages')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-      </button>
-      <div class="avatar-sm" id="chat-header-avatar"></div>
-      <h2 class="app-title" id="chat-header-name" style="font-size:19px;">Membre</h2>
-    </div>
-  </div>
-  <div id="chat-accept-bar" style="display:none; width:100%; max-width:560px; gap:8px; margin-bottom:14px;">
-    <button class="contact-action" style="flex:1;" onclick="acceptConversation(activeConversationId)">Accepter la demande</button>
-    <button class="contact-action" style="flex:1; border-color:#D9707C; color:#D9707C;" onclick="declineConversation(activeConversationId)">Refuser</button>
-  </div>
-  <div id="chat-messages" style="width:100%; max-width:560px; flex:1; overflow-y:auto; padding:6px 2px;"></div>
-  <div class="comment-input-row" style="width:calc(100% - 40px); max-width:520px; position:fixed; bottom:74px; left:50%; transform:translateX(-50%); background:var(--noir-2); padding:10px 14px; border-radius:100px; border:1px solid var(--verre-bord); z-index:15;">
-    <input type="text" id="chat-input" placeholder="Écrire un message…" onkeypress="if(event.key==='Enter'){ sendChatMessage(); }">
-    <button class="contact-action" onclick="sendChatMessage()">Envoyer</button>
+    <div class="hint" id="m-withdraw-success" style="display:none; color:var(--or-clair);">Demande envoyée — elle sera traitée manuellement via Wave.</div>
+    <button class="btn-primary" style="width:100%;" onclick="requestWithdrawalFromMonetisation()">Demander un retrait</button>
   </div>
 </div>
 
@@ -742,9 +748,6 @@
   </button>
   <button class="nav-btn" id="nav-join" onclick="goTo('join')" title="Groupe">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7Z"/></svg>
-  </button>
-  <button class="nav-btn" id="nav-messages" onclick="goTo('messages')" title="Messages">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z"/></svg>
   </button>
   <button class="nav-btn" id="nav-profile" onclick="goTo('profile')" title="Profil">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
@@ -824,20 +827,19 @@ function goTo(screen){
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + screen).classList.add('active');
   document.getElementById('bottom-nav').style.display = (screen==='welcome'||screen==='register'||screen==='confirm') ? 'none' : 'flex';
-  ['contacts','wall','solde','join','admin','videos','profile','messages'].forEach(s=>{
+  ['contacts','wall','solde','join','admin','videos','profile'].forEach(s=>{
     const el = document.getElementById('nav-'+s);
-    if(el) el.classList.toggle('active', s===screen || (s==='messages' && screen==='chat'));
+    if(el) el.classList.toggle('active', s===screen);
   });
   if(screen === 'contacts') renderContacts();
   if(screen === 'wall') renderWall();
   if(screen === 'solde') renderSolde();
   if(screen === 'admin') renderAdmin();
-  if(screen === 'videos') renderVideos();
+  if(screen === 'videos') switchVideoTab(videoTab);
   if(screen === 'profile') renderProfile();
   if(screen === 'monetisation') renderMonetisation();
   if(screen === 'accounts') renderAccounts();
-  if(screen === 'messages') renderMessages();
-  if(screen === 'chat') renderChat();
+  if(screen === 'accounts') renderAccounts();
   window.scrollTo(0,0);
 }
 
@@ -890,13 +892,6 @@ async function submitRegistration(){
   const errorEl = document.getElementById('form-error');
   errorEl.style.display = 'none';
 
-  const existingAccounts = loadMyAccountsList();
-  if(existingAccounts.length >= 3 && !existingAccounts.includes(myId)){
-    errorEl.textContent = 'Limite de 3 comptes atteinte sur cet appareil.';
-    errorEl.style.display = 'block';
-    return;
-  }
-
   if(!pendingPhoto){ document.getElementById('photo-error').style.display='block'; ok=false; }
   if(!prenom || !nom || !age || !ville || !phone){
     errorEl.textContent = 'Merci de remplir tous les champs correctement.';
@@ -920,19 +915,87 @@ async function submitRegistration(){
     return;
   }
   myId = added.id;
-  localStorage.setItem('myMemberId', myId);
-  const accounts = loadMyAccountsList();
-  if(!accounts.includes(myId)){
-    accounts.push(myId);
-    saveMyAccountsList(accounts);
-  }
-  addingAccount = false;
+  saveAccountToDevice(myId);
   updateAdminNavVisibility();
   document.getElementById('confirm-text').textContent = 'Bienvenue ' + prenom + ', vous êtes membre n°' + added.passengerNo + '.';
   goTo('confirm');
 }
 
-/* ================== RENDU : ANNUAIRE ================== */
+/* ================== GESTION MULTI-COMPTES ================== */
+function getDeviceAccountIds(){
+  return JSON.parse(localStorage.getItem('myAccountIds') || '[]');
+}
+
+function saveAccountToDevice(id){
+  const accs = getDeviceAccountIds();
+  if(!accs.includes(id)) accs.push(id);
+  localStorage.setItem('myAccountIds', JSON.stringify(accs));
+  localStorage.setItem('myMemberId', id);
+}
+
+function switchAccount(id){
+  myId = id;
+  localStorage.setItem('myMemberId', id);
+  updateAdminNavVisibility();
+  goTo('wall');
+}
+
+function removeAccountFromDevice(id){
+  if(!confirm('Retirer ce compte de cet appareil ? (le profil reste dans le cercle, seulement retiré ici)')) return;
+  const accs = getDeviceAccountIds().filter(a => a !== id);
+  localStorage.setItem('myAccountIds', JSON.stringify(accs));
+  if(myId === id){
+    myId = accs[0] || null;
+    if(myId) localStorage.setItem('myMemberId', myId);
+    else localStorage.removeItem('myMemberId');
+  }
+  renderAccounts();
+}
+
+function startNewAccount(){
+  // On ne touche pas aux comptes déjà enregistrés, on prépare juste un formulaire vierge
+  pendingPhoto = null;
+  document.getElementById('photo-preview').innerHTML = '＋';
+  document.getElementById('photo-error').style.display = 'none';
+  document.getElementById('form-error').style.display = 'none';
+  ['f-prenom','f-nom','f-age','f-ville','f-phone'].forEach(id => { document.getElementById(id).value = ''; });
+  document.getElementById('f-situation').value = 'Préfère ne pas dire';
+  goTo('register');
+}
+
+function renderAccounts(){
+  const list = document.getElementById('accounts-list');
+  const accs = getDeviceAccountIds();
+  if(accs.length === 0){
+    list.innerHTML = '<div class="empty-state">Aucun compte enregistré sur cet appareil.</div>';
+    return;
+  }
+  list.innerHTML = accs.map(id => {
+    const m = members.find(x => x.id === id);
+    const isActive = id === myId;
+    if(!m){
+      return `
+      <div class="contact-row">
+        <div class="contact-info"><div class="contact-name">Compte introuvable</div></div>
+        <button class="contact-action" onclick="removeAccountFromDevice('${id}')">Retirer</button>
+      </div>`;
+    }
+    return `
+    <div class="contact-row">
+      <div class="avatar-sm">${m.photo ? '<img src="'+m.photo+'">' : m.prenom[0]}</div>
+      <div class="contact-info">
+        <div class="contact-name">${escapeHtml(m.prenom)} ${escapeHtml(m.nom)} ${m.verified ? '<span class="badge-verif">'+badgeSVG()+'</span>' : ''}</div>
+        <div class="contact-phone">${isActive ? 'Compte actif' : 'Toucher pour utiliser'}</div>
+      </div>
+      ${isActive
+        ? '<span class="contact-action" style="opacity:.5;">Actif</span>'
+        : `<button class="contact-action" onclick="switchAccount('${id}')">Utiliser</button>`
+      }
+    </div>`;
+  }).join('');
+}
+
+
 function renderContacts(){
   const list = document.getElementById('contacts-list');
   document.getElementById('count-pill-contacts').textContent = members.length + (members.length>1?' membres':' membre');
@@ -940,16 +1003,24 @@ function renderContacts(){
     list.innerHTML = '<div class="empty-state">Personne ne s\'est encore présenté. Sois le premier.</div>';
     return;
   }
-  list.innerHTML = members.slice().reverse().map(m => `
+  list.innerHTML = members.slice().reverse().map(m => {
+    const followers = m.followers || [];
+    const iFollow = myId && followers.includes(myId);
+    const isMe = m.id === myId;
+    return `
     <div class="contact-row">
       <div class="avatar-sm">${m.photo ? '<img src="'+m.photo+'">' : m.prenom[0]}</div>
       <div class="contact-info">
         <div class="contact-name">${escapeHtml(m.prenom)} ${escapeHtml(m.nom)} ${m.verified ? '<span class="badge-verif">'+badgeSVG()+'</span>' : ''}</div>
-        <div class="contact-phone">${escapeHtml(m.phone)}</div>
+        <div class="contact-phone">${escapeHtml(m.phone)} · ${followers.length} Follower${followers.length>1?'s':''}</div>
       </div>
-      <a class="contact-action" href="https://wa.me/${cleanPhone(m.phone)}" target="_blank" rel="noopener">Contacter</a>
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        <a class="contact-action" href="https://wa.me/${cleanPhone(m.phone)}" target="_blank" rel="noopener">Contacter</a>
+        ${!isMe ? `<button class="contact-action" onclick="toggleFollow('${m.id}', true)">${iFollow ? 'Suivi ✓' : 'Suivre'}</button>` : ''}
+      </div>
     </div>
-  `).join('');
+  `;
+  }).join('');
 }
 
 /* ================== RENDU : CERCLE ================== */
@@ -976,7 +1047,7 @@ function renderWall(){
         </div>
         <div>
           <div class="mcard-name">${escapeHtml(m.prenom)} ${escapeHtml(m.nom)}</div>
-          <div class="mcard-no">Membre n°${m.passengerNo} · ${followers.length} abonné${followers.length>1?'s':''}</div>
+          <div class="mcard-no">Membre n°${m.passengerNo} · ${followers.length} Follower${followers.length>1?'s':''}</div>
         </div>
       </div>
       <div class="mcard-divider"></div>
@@ -986,7 +1057,7 @@ function renderWall(){
       </div>
       ${!isMe ? `
       <div style="display:flex; gap:8px; margin-top:14px;">
-        <button class="contact-action" style="flex:1;" onclick="toggleFollow('${m.id}')">${iFollow ? 'Abonné ✓' : 'Suivre'}</button>
+        <button class="contact-action" style="flex:1;" onclick="toggleFollow('${m.id}')">${iFollow ? 'Suivi ✓' : 'Suivre'}</button>
         ${(iAmVerified && !m.verified) ? `<button class="contact-action" style="flex:1;" onclick="certifyMember('${m.id}')">Certifier</button>` : ''}
       </div>` : ''}
     </div>
@@ -994,7 +1065,7 @@ function renderWall(){
   }).join('');
 }
 
-async function toggleFollow(targetId){
+async function toggleFollow(targetId, fromContacts){
   if(!myId){ return; }
   try{
     const res = await fetch('/api/members/' + targetId + '/follow', {
@@ -1005,7 +1076,7 @@ async function toggleFollow(targetId){
     if(res.ok){
       const data = await res.json();
       members = data.members;
-      renderWall();
+      if(fromContacts) renderContacts(); else renderWall();
     }
   }catch(e){ console.error(e); }
 }
@@ -1033,35 +1104,16 @@ function escapeHtml(str){
   return d.innerHTML;
 }
 
-/* ================== PAIEMENT : LOGOS ================== */
-function paymentLogoHTML(method){
-  if(method === 'mtn'){
-    return `<div style="display:flex; align-items:center; gap:9px; padding:9px 12px; border-radius:8px; background:rgba(255,204,0,0.12); border:1px solid rgba(255,204,0,0.35);">
-      <svg width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#FFCC00"/><text x="12" y="15" font-family="Inter, sans-serif" font-size="7.5" font-weight="800" text-anchor="middle" fill="#000">MTN</text></svg>
-      <span style="font-size:12.5px; font-weight:600; color:#ffe17a;">MTN Mobile Money</span>
-    </div>`;
-  }
-  return `<div style="display:flex; align-items:center; gap:9px; padding:9px 12px; border-radius:8px; background:rgba(30,144,255,0.1); border:1px solid rgba(30,144,255,0.3);">
-    <svg width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#1E90FF"/><path d="M4.5 13c1.1-3 1.9-3 3-0.2 1.1 2.8 1.9 2.8 3-0.1 1.1-2.8 1.9-2.8 3 0 1.1 2.6 1.9 2.6 2.9 0" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
-    <span style="font-size:12.5px; font-weight:600; color:#8ec9ff;">Wave</span>
-  </div>`;
-}
-
-function updatePaymentLogo(prefix){
-  const select = document.getElementById(prefix + '-method');
-  const logoZone = document.getElementById(prefix + '-method-logo');
-  const labelTag = document.getElementById(prefix + '-method-label-tag');
-  if(!select || !logoZone) return;
-  logoZone.innerHTML = paymentLogoHTML(select.value);
-  if(labelTag) labelTag.textContent = select.value === 'mtn' ? 'MTN' : 'Wave';
-}
-
-/* ================== CONDITIONS DE RETRAIT ================== */
-function conditionsMet(me){
-  if(!me) return false;
-  const groupApproved = me.groupProofStatus === 'approved';
-  const videosOk = getVideosToday() >= 5;
-  return groupApproved && videosOk;
+function timeAgo(ts){
+  if(!ts) return '';
+  const diff = Math.max(0, Date.now() - Number(ts));
+  const min = Math.floor(diff / 60000);
+  if(min < 1) return 'à l\'instant';
+  if(min < 60) return min + ' min';
+  const h = Math.floor(min / 60);
+  if(h < 24) return h + ' h';
+  const j = Math.floor(h / 24);
+  return j + ' j';
 }
 
 /* ================== SOLDE / RETRAIT ================== */
@@ -1072,18 +1124,8 @@ function renderSolde(){
   document.getElementById('stat-referrals').textContent = me.referralCount || 0;
   document.getElementById('stat-videos').textContent = me.videosCount || 0;
   document.getElementById('stat-likes').textContent = me.likesCount || 0;
-  document.getElementById('stat-balance').textContent = (me.balance || 0).toLocaleString();
   document.getElementById('withdraw-error').style.display = 'none';
   document.getElementById('withdraw-success').style.display = 'none';
-
-  const ok = conditionsMet(me);
-  document.getElementById('withdraw-conditions-warning').style.display = ok ? 'none' : 'block';
-  const btn = document.getElementById('withdraw-submit-btn');
-  btn.disabled = !ok;
-  btn.style.opacity = ok ? '1' : '.45';
-  btn.style.cursor = ok ? 'pointer' : 'not-allowed';
-
-  updatePaymentLogo('withdraw');
 }
 
 function copyReferralLink(){
@@ -1093,50 +1135,22 @@ function copyReferralLink(){
 }
 
 async function requestWithdrawal(){
-  const me = members.find(m => m.id === myId);
+  const amount = parseInt(document.getElementById('withdraw-amount').value, 10);
   const errorEl = document.getElementById('withdraw-error');
   const successEl = document.getElementById('withdraw-success');
   errorEl.style.display = 'none';
   successEl.style.display = 'none';
 
-  if(!conditionsMet(me)){
-    errorEl.textContent = "Tu dois d'abord remplir les conditions de monétisation avant de pouvoir retirer.";
-    errorEl.style.display = 'block';
-    return;
-  }
-
-  const balance = (me && me.balance) || 0;
-  if(balance <= 0){
-    errorEl.textContent = 'Ton solde est vide, tu ne peux pas encore faire de retrait.';
-    errorEl.style.display = 'block';
-    return;
-  }
-
-  const amount = parseInt(document.getElementById('withdraw-amount').value, 10);
   if(!amount || amount <= 0 || amount > 50000){
     errorEl.textContent = 'Montant invalide (entre 1 et 50 000 F).';
     errorEl.style.display = 'block';
     return;
   }
-  if(amount > balance){
-    errorEl.textContent = 'Tu ne peux pas retirer plus que ton solde disponible (' + balance.toLocaleString() + ' F).';
-    errorEl.style.display = 'block';
-    return;
-  }
-
-  const paymentMethod = document.getElementById('withdraw-method').value;
-  const paymentNumber = document.getElementById('withdraw-payment-number').value.trim();
-  if(!paymentNumber){
-    errorEl.textContent = 'Indique ton numéro ' + (paymentMethod === 'mtn' ? 'MTN Mobile Money' : 'Wave') + '.';
-    errorEl.style.display = 'block';
-    return;
-  }
-
   try{
     const res = await fetch('/api/withdrawals', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ memberId: myId, amount, paymentMethod, paymentNumber })
+      body: JSON.stringify({ memberId: myId, amount })
     });
     if(res.ok){
       successEl.style.display = 'block';
@@ -1174,8 +1188,7 @@ async function renderAdmin(){
     list.innerHTML = requests.map(r => `
       <div class="contact-row" style="flex-direction:column; align-items:stretch; gap:10px;">
         <div class="contact-name">${escapeHtml(r.prenom)} ${escapeHtml(r.nom)} — ${r.amount.toLocaleString()} F</div>
-        ${paymentLogoHTML(r.paymentMethod || 'wave')}
-        <div class="contact-phone">Numéro : ${escapeHtml(r.paymentNumber || r.phone)}</div>
+        <div class="contact-phone">Wave : ${escapeHtml(r.phone)}</div>
         <div class="contact-phone">Parrainages : ${r.referralCount} · Vidéos : ${r.videosCount} · Likes : ${r.likesCount}</div>
         <button class="contact-action" onclick="markPaid('${r.id}')">Marquer payé</button>
       </div>
@@ -1275,31 +1288,87 @@ async function submitVideo(){
   }
 }
 
+let videoTab = 'foryou';
+
+function switchVideoTab(tab){
+  videoTab = tab;
+  ['foryou','following','favorites'].forEach(t=>{
+    document.getElementById('tab-'+t).classList.toggle('active', t===tab);
+  });
+  renderVideos();
+}
+
+function getVisibleVideos(){
+  const all = videos.slice().reverse();
+  if(videoTab === 'following'){
+    const me = members.find(m => m.id === myId);
+    return all.filter(v => {
+      const author = members.find(m => m.id === v.authorId);
+      return author && (author.followers || []).includes(myId);
+    });
+  }
+  if(videoTab === 'favorites'){
+    return all.filter(v => (v.favorites || []).includes(myId));
+  }
+  return all;
+}
+
 function renderVideos(){
   const list = document.getElementById('videos-list');
-  if(!videos || videos.length === 0){
-    list.innerHTML = '<div class="empty-state">Aucune vidéo publiée pour l\'instant.</div>';
+  const visible = getVisibleVideos();
+
+  if(!visible || visible.length === 0){
+    const msg = videoTab === 'following' ? 'Les vidéos des membres que tu suis apparaîtront ici.'
+      : videoTab === 'favorites' ? 'Aucune vidéo mise en favori pour l\'instant.'
+      : 'Aucune vidéo publiée pour l\'instant.';
+    list.innerHTML = '<div class="empty-state">'+msg+'</div>';
     return;
   }
-  list.innerHTML = videos.slice().reverse().map(v => {
+
+  list.innerHTML = visible.map(v => {
     const author = members.find(m => m.id === v.authorId);
     const likes = v.likes || [];
     const comments = v.comments || [];
+    const favorites = v.favorites || [];
+    const reposts = v.reposts || [];
     const iLiked = myId && likes.includes(myId);
+    const iSaved = myId && favorites.includes(myId);
+    const iReposted = myId && reposts.includes(myId);
     return `
     <div class="video-card">
-      <div class="contact-name">${author ? escapeHtml(author.prenom)+' '+escapeHtml(author.nom) : 'Membre'} ${author && author.verified ? '<span class="badge-verif">'+badgeSVG()+'</span>' : ''}</div>
+      ${iReposted ? '<div class="repost-tag">🔁 Republié par toi</div>' : ''}
+      <div style="display:flex; align-items:center; justify-content:space-between;">
+        <div class="contact-name">${author ? escapeHtml(author.prenom)+' '+escapeHtml(author.nom) : 'Membre'} ${author && author.verified ? '<span class="badge-verif">'+badgeSVG()+'</span>' : ''}</div>
+        <button class="menu-dots-btn" onclick="openVideoMenu('${v.id}')">⋯</button>
+      </div>
       ${v.desc ? '<div class="hint" style="margin:6px 0 0;">'+escapeHtml(v.desc)+'</div>' : ''}
       <div class="video-embed">
         <video src="${v.videoData || v.link || ''}" controls playsinline></video>
       </div>
       <div class="video-actions">
-        <button class="${iLiked?'liked':''}" onclick="toggleLike('${v.id}')">❤️ ${likes.length}</button>
+        <button class="${iLiked?'liked':''}" onclick="toggleLike('${v.id}')">🤍 ${likes.length}</button>
         <button onclick="focusComment('${v.id}')">💬 ${comments.length}</button>
-        <button onclick="shareVideo('${v.id}')">↗ Partager</button>
+        <button class="${iReposted?'reposted':''}" onclick="toggleRepost('${v.id}')">🔁 ${reposts.length}</button>
+        <button class="${iSaved?'saved':''}" onclick="toggleFavorite('${v.id}')">🔖</button>
       </div>
       <div class="comment-list">
-        ${comments.map(c => '<div class="comment-item"><b>'+escapeHtml(c.authorName||'Membre')+'</b> '+escapeHtml(c.text)+'</div>').join('')}
+        ${comments.map(c => {
+          const commenter = members.find(m => m.id === c.memberId);
+          const canDelete = myId && c.memberId === myId;
+          return `
+          <div class="comment-item">
+            <div class="comment-avatar">${commenter && commenter.photo ? '<img src="'+commenter.photo+'">' : escapeHtml((c.authorName||'M')[0])}</div>
+            <div class="comment-bubble">
+              <div class="comment-bubble-top">
+                <span class="comment-author">${escapeHtml(c.authorName||'Membre')}</span>
+                <span class="comment-time">${timeAgo(c.ts)}</span>
+              </div>
+              <div class="comment-text">${escapeHtml(c.text)}</div>
+              ${canDelete ? `<button class="comment-delete" onclick="deleteComment('${v.id}','${c.id}')">Supprimer</button>` : ''}
+            </div>
+          </div>
+          `;
+        }).join('')}
       </div>
       <div class="comment-input-row">
         <input type="text" id="comment-input-${v.id}" placeholder="Écrire un commentaire…">
@@ -1326,6 +1395,98 @@ async function toggleLike(videoId){
   }catch(e){ console.error(e); }
 }
 
+async function toggleFavorite(videoId){
+  if(!myId) return;
+  try{
+    const res = await fetch('/api/videos/'+videoId+'/favorite', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ memberId: myId })
+    });
+    if(res.ok){
+      const data = await res.json();
+      videos = data.videos;
+      renderVideos();
+    }
+  }catch(e){ console.error(e); }
+}
+
+async function toggleRepost(videoId){
+  if(!myId) return;
+  try{
+    const res = await fetch('/api/videos/'+videoId+'/repost', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ memberId: myId })
+    });
+    if(res.ok){
+      const data = await res.json();
+      videos = data.videos;
+      renderVideos();
+      renderProfile();
+    }
+  }catch(e){ console.error(e); }
+}
+
+async function deleteVideo(videoId){
+  if(!myId) return;
+  try{
+    const res = await fetch('/api/videos/'+videoId, {
+      method:'DELETE',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ requesterId: myId })
+    });
+    if(res.ok){
+      const data = await res.json();
+      videos = data.videos;
+      renderVideos();
+    }
+  }catch(e){ console.error(e); }
+}
+
+/* ================== MENU ... (VIDEO) ================== */
+let activeMenuVideoId = null;
+
+function openVideoMenu(videoId){
+  activeMenuVideoId = videoId;
+  const v = videos.find(x => x.id === videoId);
+  if(!v) return;
+  const iSaved = myId && (v.favorites || []).includes(myId);
+  const iReposted = myId && (v.reposts || []).includes(myId);
+  document.getElementById('menu-favorite-label').textContent = iSaved ? 'Retirer des favoris' : 'Mettre en favori';
+  document.getElementById('menu-repost-label').textContent = iReposted ? 'Annuler la republication' : 'Republier';
+  document.getElementById('menu-delete').style.display = (v.authorId === myId) ? 'flex' : 'none';
+  document.getElementById('menu-overlay').classList.add('active');
+}
+
+function closeVideoMenu(e){
+  if(e) e.stopPropagation();
+  document.getElementById('menu-overlay').classList.remove('active');
+  activeMenuVideoId = null;
+}
+
+function menuAction(action){
+  const videoId = activeMenuVideoId;
+  if(!videoId) return;
+  closeVideoMenu();
+  if(action === 'favorite') toggleFavorite(videoId);
+  if(action === 'repost') toggleRepost(videoId);
+  if(action === 'share') shareVideo(videoId);
+  if(action === 'copylink') copyVideoLink(videoId);
+  if(action === 'delete'){
+    if(confirm('Supprimer définitivement cette vidéo ?')) deleteVideo(videoId);
+  }
+}
+
+function copyVideoLink(videoId){
+  const url = window.location.origin + '/api/videos/' + videoId + '/raw';
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(url).then(()=> alert('Lien copié !')).catch(()=> prompt('Copie ce lien :', url));
+  } else {
+    prompt('Copie ce lien :', url);
+  }
+}
+
 function focusComment(videoId){
   const el = document.getElementById('comment-input-'+videoId);
   if(el) el.focus();
@@ -1350,10 +1511,26 @@ async function submitComment(videoId){
   }catch(e){ console.error(e); }
 }
 
+async function deleteComment(videoId, commentId){
+  if(!myId) return;
+  try{
+    const res = await fetch('/api/videos/'+videoId+'/comment/'+commentId, {
+      method:'DELETE',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ requesterId: myId })
+    });
+    if(res.ok){
+      const data = await res.json();
+      videos = data.videos;
+      renderVideos();
+    }
+  }catch(e){ console.error(e); }
+}
+
 function shareVideo(videoId){
   const v = videos.find(x => x.id === videoId);
   if(!v) return;
-  const shareUrl = v.link;
+  const shareUrl = window.location.origin + '/api/videos/' + videoId + '/raw';
   if(navigator.share){
     navigator.share({ title: CONFIG.GROUP_NAME, url: shareUrl }).catch(()=>{});
   } else {
@@ -1367,7 +1544,9 @@ function renderProfile(){
   const me = members.find(m => m.id === myId);
   if(!me){ card.innerHTML = '<div class="empty-state">Profil introuvable.</div>'; return; }
 
-  const myVideos = videos.filter(v => v.authorId === myId).slice().reverse();
+  const myOwnVideos = videos.filter(v => v.authorId === myId);
+  const myReposts = videos.filter(v => v.authorId !== myId && (v.reposts || []).includes(myId));
+  const myVideos = myOwnVideos.concat(myReposts).sort((a,b) => b.ts - a.ts);
   const followersCount = (me.followers || []).length;
   const followingCount = members.filter(m => (m.followers || []).includes(myId)).length;
 
@@ -1380,9 +1559,9 @@ function renderProfile(){
       <div class="mcard-name">${escapeHtml(me.prenom)} ${escapeHtml(me.nom)} ${me.verified ? '<span class="badge-verif">'+badgeSVG()+'</span>' : ''}</div>
       <div class="mcard-no">Membre n°${me.passengerNo}</div>
       <div class="profile-stats">
-        <div class="profile-stat"><b>${myVideos.length}</b><span>Vidéos</span></div>
-        <div class="profile-stat"><b>${followersCount}</b><span>Abonnés</span></div>
-        <div class="profile-stat"><b>${followingCount}</b><span>Abonnements</span></div>
+        <div class="profile-stat"><b>${myOwnVideos.length}</b><span>Vidéos</span></div>
+        <div class="profile-stat"><b>${followersCount}</b><span>Followers</span></div>
+        <div class="profile-stat"><b>${followingCount}</b><span>Following</span></div>
       </div>
       <div class="mcard-meta" style="text-align:center;">
         ${escapeHtml(me.age)} ans <span style="opacity:.5;">🐾</span> ${escapeHtml(me.ville)}<br>
@@ -1394,7 +1573,8 @@ function renderProfile(){
       ${myVideos.length === 0
         ? '<div class="empty-state">Aucune vidéo publiée pour l\'instant.</div>'
         : '<div class="profile-video-grid">' + myVideos.map(v => `
-            <div class="profile-video-cell">
+            <div class="profile-video-cell" onclick="goTo('videos')">
+              ${v.authorId !== myId ? '<span class="cell-likes" style="top:6px; bottom:auto; left:6px;">🔁</span>' : ''}
               <video src="${v.videoData || v.link || ''}" muted playsinline></video>
               <span class="cell-likes">❤ ${(v.likes||[]).length}</span>
             </div>
@@ -1479,7 +1659,7 @@ function renderGroupProofZone(){
     ${statusHtml}
     ${pendingProofPhoto ? '<img class="proof-thumb" src="'+pendingProofPhoto+'">' : (me && me.groupProofPhoto ? '<img class="proof-thumb" src="'+me.groupProofPhoto+'">' : '')}
     <div style="margin-bottom:16px;">
-      <label class="upload-btn" for="proof-input">${status === 'approved' ? 'Remplacer la capture' : 'Choisir une capture d\'écran'}</label>
+      <label class="upload-btn" for="proof-input">${status === 'approved' ? 'Remplacer la capture' : 'Choisir une capture d\\'écran'}</label>
       <input type="file" id="proof-input" accept="image/*" style="display:none;" onchange="handleProofPhoto(event)">
     </div>
     <button class="btn-primary" style="width:100%; margin-bottom:20px;" onclick="submitGroupProof()" ${pendingProofPhoto ? '' : 'disabled'}>Envoyer pour vérification</button>
@@ -1556,66 +1736,24 @@ function renderMonetisation(){
   `).join('');
 
   renderGroupProofZone();
-
-  document.getElementById('m-stat-balance').textContent = ((me && me.balance) || 0).toLocaleString();
-  document.getElementById('m-withdraw-error').style.display = 'none';
-  document.getElementById('m-withdraw-success').style.display = 'none';
-
-  const ok = conditionsMet(me);
-  document.getElementById('m-withdraw-conditions-warning').style.display = ok ? 'none' : 'block';
-  const mBtn = document.getElementById('m-withdraw-submit-btn');
-  mBtn.disabled = !ok;
-  mBtn.style.opacity = ok ? '1' : '.45';
-  mBtn.style.cursor = ok ? 'pointer' : 'not-allowed';
-
-  updatePaymentLogo('m-withdraw');
 }
 
 async function requestWithdrawalFromMonetisation(){
-  const me = members.find(m => m.id === myId);
+  const amount = parseInt(document.getElementById('m-withdraw-amount').value, 10);
   const errorEl = document.getElementById('m-withdraw-error');
   const successEl = document.getElementById('m-withdraw-success');
   errorEl.style.display = 'none';
   successEl.style.display = 'none';
-
-  if(!conditionsMet(me)){
-    errorEl.textContent = "Tu dois d'abord remplir les conditions de monétisation avant de pouvoir retirer.";
-    errorEl.style.display = 'block';
-    return;
-  }
-
-  const balance = (me && me.balance) || 0;
-  if(balance <= 0){
-    errorEl.textContent = 'Ton solde est vide, tu ne peux pas encore faire de retrait.';
-    errorEl.style.display = 'block';
-    return;
-  }
-
-  const amount = parseInt(document.getElementById('m-withdraw-amount').value, 10);
   if(!amount || amount <= 0 || amount > 50000){
     errorEl.textContent = 'Montant invalide (entre 1 et 50 000 F).';
     errorEl.style.display = 'block';
     return;
   }
-  if(amount > balance){
-    errorEl.textContent = 'Tu ne peux pas retirer plus que ton solde disponible (' + balance.toLocaleString() + ' F).';
-    errorEl.style.display = 'block';
-    return;
-  }
-
-  const paymentMethod = document.getElementById('m-withdraw-method').value;
-  const paymentNumber = document.getElementById('m-withdraw-payment-number').value.trim();
-  if(!paymentNumber){
-    errorEl.textContent = 'Indique ton numéro ' + (paymentMethod === 'mtn' ? 'MTN Mobile Money' : 'Wave') + '.';
-    errorEl.style.display = 'block';
-    return;
-  }
-
   try{
     const res = await fetch('/api/withdrawals', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ memberId: myId, amount, paymentMethod, paymentNumber })
+      body: JSON.stringify({ memberId: myId, amount })
     });
     if(res.ok){
       successEl.style.display = 'block';
@@ -1639,6 +1777,7 @@ async function requestWithdrawalFromMonetisation(){
   const savedId = localStorage.getItem('myMemberId');
   if(savedId && members.find(m => m.id === savedId)){
     myId = savedId;
+    saveAccountToDevice(myId); // rattrape les comptes créés avant l'ajout du multi-compte
     updateAdminNavVisibility();
     goTo('wall');
   } else {
