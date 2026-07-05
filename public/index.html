@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Le Carnet</title>
+<title> Sunset com</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Sacramento&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -207,36 +207,23 @@
     padding:7px 14px; border-radius:100px;
   }
 
-  /* ---------- BOTTOM NAV (style Instagram : icône + label) ---------- */
   .bottom-nav{
     position:fixed; bottom:0; left:0; right:0;
-    background:rgba(11,11,12,0.94);
+    background:rgba(11,11,12,0.92);
     backdrop-filter:blur(14px);
     border-top:1px solid var(--verre-bord);
-    display:flex; justify-content:space-around; align-items:flex-end;
-    padding:8px 6px calc(6px + env(safe-area-inset-bottom));
+    display:flex; justify-content:space-around; align-items:center;
+    padding:10px 8px calc(10px + env(safe-area-inset-bottom));
     z-index:20;
   }
   .nav-btn{
-    position:relative;
-    display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
-    gap:4px;
-    width:60px; padding:4px 2px 6px;
-    color:var(--creme); opacity:.5;
+    width:44px; height:44px; border-radius:12px;
+    display:flex; align-items:center; justify-content:center;
+    color:var(--creme); opacity:.45;
     background:transparent;
   }
-  .nav-btn svg{ width:23px; height:23px; }
-  .nav-btn span{
-    font-size:10px; font-weight:600; letter-spacing:.01em;
-  }
-  .nav-btn.active{ opacity:1; color:var(--or-clair); }
-  .nav-btn.nav-plus{
-    background:linear-gradient(135deg, var(--or-clair), var(--bordeaux));
-    color:#1a1408; border-radius:10px; opacity:1;
-    width:44px; height:34px; justify-content:center;
-    margin:0 2px;
-  }
-  .nav-btn.nav-plus svg{ width:20px; height:20px; }
+  .nav-btn svg{ width:22px; height:22px; }
+  .nav-btn.active{ opacity:1; color:var(--or-clair); background:rgba(201,162,75,0.12); }
 
   /* ---------- CONTACTS ---------- */
   .contact-row{
@@ -357,30 +344,40 @@
     text-align:center; opacity:.4; padding:40px 20px; max-width:320px; font-size:14px;
   }
 
-  /* ---------- CRITERES DE CERTIFICATION ---------- */
-  .crit-row{
-    display:flex; align-items:center; gap:12px;
-    padding:12px 0; border-bottom:1px solid var(--verre-bord);
+  /* ---------- VIDEOS ---------- */
+  .video-card{
+    width:100%; background:var(--verre); border:1px solid var(--verre-bord);
+    border-radius:14px; padding:16px; margin-bottom:16px;
   }
-  .crit-row:last-child{ border-bottom:none; }
-  .crit-check{
-    width:24px; height:24px; border-radius:50%; flex-shrink:0;
+  .video-embed{ width:100%; border-radius:10px; overflow:hidden; margin:10px 0; background:#000; }
+  .video-embed iframe{ width:100%; display:block; aspect-ratio:16/9; border:0; }
+  .video-actions{ display:flex; gap:10px; margin-top:10px; }
+  .video-actions button{
+    background:transparent; border:1px solid var(--verre-bord); color:var(--creme);
+    padding:8px 14px; border-radius:100px; font-size:12px; font-weight:600;
+  }
+  .video-actions button.liked{ border-color:var(--or); color:var(--or-clair); }
+  .comment-list{ margin-top:12px; display:flex; flex-direction:column; gap:8px; }
+  .comment-item{ font-size:12.5px; opacity:.75; }
+  .comment-item b{ opacity:1; color:var(--or-clair); }
+  .comment-input-row{ display:flex; gap:8px; margin-top:10px; }
+  .comment-input-row input{
+    flex:1; padding:10px 12px; border-radius:100px; border:1px solid var(--verre-bord);
+    background:rgba(255,255,255,0.03); color:var(--creme); font-size:12.5px;
+  }
+
+  /* ---------- MONETISATION ---------- */
+  .cond-item{ display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--verre-bord); }
+  .cond-item:last-child{ border-bottom:none; }
+  .cond-dot{
+    width:22px; height:22px; border-radius:50%; flex-shrink:0;
     display:flex; align-items:center; justify-content:center;
     border:1.5px solid var(--verre-bord);
-    background:transparent;
   }
-  .crit-check.done{
-    background:var(--bleu-verif); border-color:var(--bleu-verif);
-  }
-  .crit-check svg{ width:12px; height:12px; }
-  .crit-info{ flex:1; }
-  .crit-label{ font-size:13.5px; font-weight:600; color:var(--creme); }
-  .crit-progress{ font-size:11.5px; opacity:.5; margin-top:2px; }
-  .cert-banner{
-    text-align:center; font-size:12.5px; color:var(--or-clair);
-    background:rgba(201,162,75,0.08); border:1px solid var(--verre-bord);
-    border-radius:10px; padding:12px; margin-top:16px; line-height:1.6;
-  }
+  .cond-dot.done{ background:var(--bleu-verif); border-color:var(--bleu-verif); }
+  .cond-dot svg{ width:11px; height:11px; }
+  .cond-text{ font-size:13px; }
+  .cond-text small{ display:block; opacity:.5; font-size:11px; margin-top:2px; }
 </style>
 </head>
 <body>
@@ -500,11 +497,13 @@
     <button class="upload-btn" style="margin-bottom:20px;" onclick="copyReferralLink()">Copier le lien</button>
 
     <div class="mcard-divider"></div>
-    <div class="eyebrow" style="margin-top:16px;">Critères de certification</div>
-    <div id="criteria-list"></div>
-    <div class="cert-banner" id="cert-banner"></div>
+    <div class="mcard-meta" style="margin:16px 0; font-size:14px;">
+      <div>Membres ajoutés : <b id="stat-referrals">0</b></div>
+      <div>Vidéos publiées : <b id="stat-videos">0</b></div>
+      <div>Likes reçus : <b id="stat-likes">0</b></div>
+    </div>
 
-    <div class="field" style="margin-top:22px;">
+    <div class="field">
       <label>Demander un retrait (max 50 000 F)</label>
       <input type="number" id="withdraw-amount" placeholder="10000" min="1" max="50000">
     </div>
@@ -522,26 +521,111 @@
   <div id="admin-list" style="width:100%; display:flex; flex-direction:column; align-items:center; max-width:520px;"></div>
 </div>
 
-<!-- ===================== NAV BAR (style Instagram : icône + texte) ===================== -->
+<!-- ===================== ECRAN 9 : VIDEOS ===================== -->
+<div class="screen" id="screen-videos">
+  <div class="app-header">
+    <h2 class="app-title">Vidéos</h2>
+    <button class="contact-action" onclick="goTo('post-video')">+ Publier</button>
+  </div>
+  <div id="videos-list" style="width:100%; display:flex; flex-direction:column; align-items:center; max-width:560px;"></div>
+</div>
+
+<!-- ===================== ECRAN 10 : PUBLIER UNE VIDEO ===================== -->
+<div class="screen" id="screen-post-video">
+  <div class="eyebrow">Nouvelle publication</div>
+  <h2 style="color:var(--creme); margin-bottom:22px; font-size:26px;">Publier une vidéo</h2>
+  <div class="card-panel">
+    <div class="field">
+      <label>Lien de la vidéo</label>
+      <input type="url" id="v-link" placeholder="https://...">
+    </div>
+    <div class="field">
+      <label>Description</label>
+      <input type="text" id="v-desc" placeholder="Un mot sur ta vidéo">
+    </div>
+    <div class="form-error" id="video-error">Ajoute un lien valide.</div>
+    <button class="btn-primary" style="width:100%;" onclick="submitVideo()">Publier</button>
+  </div>
+</div>
+
+<!-- ===================== ECRAN 11 : PROFIL ===================== -->
+<div class="screen" id="screen-profile">
+  <div class="app-header">
+    <h2 class="app-title">Mon profil</h2>
+    <button class="contact-action" onclick="goTo('settings')">Paramètres</button>
+  </div>
+  <div id="profile-card" style="width:100%; max-width:420px;"></div>
+</div>
+
+<!-- ===================== ECRAN 12 : PARAMETRES ===================== -->
+<div class="screen" id="screen-settings">
+  <div class="app-header">
+    <h2 class="app-title">Paramètres</h2>
+  </div>
+  <div style="width:100%; max-width:460px;">
+    <div class="contact-row" style="cursor:pointer;" onclick="goTo('monetisation')">
+      <div class="contact-info">
+        <div class="contact-name">Monétisation</div>
+        <div class="contact-phone">Conditions et demande de retrait</div>
+      </div>
+      <span class="contact-action">Ouvrir</span>
+    </div>
+    <div class="contact-row" style="cursor:pointer;" onclick="goTo('wall')">
+      <div class="contact-info">
+        <div class="contact-name">Retour au cercle</div>
+      </div>
+      <span class="contact-action">Ouvrir</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== ECRAN 13 : MONETISATION ===================== -->
+<div class="screen" id="screen-monetisation">
+  <div class="app-header">
+    <h2 class="app-title">Monétisation</h2>
+  </div>
+  <div class="card-panel" style="max-width:460px;">
+    <div class="hint" style="margin-bottom:18px;">Trois conditions pour débloquer ta monétisation</div>
+    <div id="mon-conditions"></div>
+    <div class="mcard-divider" style="margin:20px 0;"></div>
+    <div class="field">
+      <label>Membres ajoutés au groupe WhatsApp</label>
+      <input type="number" id="m-group-count" placeholder="0" min="0">
+    </div>
+    <button class="upload-btn" style="margin-bottom:20px;" onclick="saveGroupCount()">Enregistrer</button>
+    <div class="mcard-divider" style="margin:8px 0 20px;"></div>
+    <div class="field">
+      <label>Demander un retrait (max 50 000 F)</label>
+      <input type="number" id="m-withdraw-amount" placeholder="10000" min="1" max="50000">
+    </div>
+    <div class="form-error" id="m-withdraw-error">Montant invalide.</div>
+    <div class="hint" id="m-withdraw-success" style="display:none; color:var(--or-clair);">Demande envoyée .</div>
+    <button class="btn-primary" style="width:100%;" onclick="requestWithdrawalFromMonetisation()">Demander un retrait</button>
+  </div>
+</div>
+
+<!-- ===================== NAV BAR ===================== -->
 <div class="bottom-nav" id="bottom-nav" style="display:none;">
-  <button class="nav-btn" id="nav-contacts" onclick="goTo('contacts')">
+  <button class="nav-btn" id="nav-contacts" onclick="goTo('contacts')" title="Annuaire">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M17 3.13a4 4 0 0 1 0 7.75"/></svg>
-    <span>Annuaire</span>
   </button>
-  <button class="nav-btn" id="nav-wall" onclick="goTo('wall')">
+  <button class="nav-btn" id="nav-wall" onclick="goTo('wall')" title="Cercle">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-    <span>Cercle</span>
   </button>
-  <button class="nav-btn nav-plus" id="nav-join" onclick="goTo('join')" title="Groupe">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-  </button>
-  <button class="nav-btn" id="nav-solde" onclick="goTo('solde')">
+  <button class="nav-btn" id="nav-solde" onclick="goTo('solde')" title="Solde">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M6 15h4"/></svg>
-    <span>Solde</span>
   </button>
-  <button class="nav-btn" id="nav-admin" onclick="goTo('admin')" style="display:none;">
+  <button class="nav-btn" id="nav-videos" onclick="goTo('videos')" title="Vidéos">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="15" height="14" rx="2"/><path d="M17 10l5-3v10l-5-3"/></svg>
+  </button>
+  <button class="nav-btn" id="nav-join" onclick="goTo('join')" title="Groupe">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7Z"/></svg>
+  </button>
+  <button class="nav-btn" id="nav-profile" onclick="goTo('profile')" title="Profil">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+  </button>
+  <button class="nav-btn" id="nav-admin" onclick="goTo('admin')" style="display:none;" title="Admin">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>
-    <span>Admin</span>
   </button>
 </div>
 
@@ -549,15 +633,9 @@
 /* ================== CONFIG — à personnaliser avant de partager ================== */
 const CONFIG = {
   GROUP_NAME: "Le Carnet",
-  GROUP_EYEBROW: "Cercle privé",
-  GROUP_JOIN_LINK: "https://chat.whatsapp.com/TON_LIEN_ICI",
-  VERIFIED_FULL_NAMES: ["Junny"],
-  // Seuils à atteindre pour être certifié automatiquement (modifiable ici)
-  CRITERIA: [
-    { key:"referralCount", label:"20 membres ajoutés au groupe WhatsApp", target:20 },
-    { key:"videosCount",   label:"5 vidéos publiées",                    target:5 },
-    { key:"likesCount",    label:"100 likes reçus",                      target:100 }
-  ]
+  GROUP_EYEBROW: "Best Friends Sunset",
+  GROUP_JOIN_LINK: "https://chat.whatsapp.com/H39dmSIg76hCMN4K6O7NBv",
+  VERIFIED_FULL_NAMES: ["Junny"]
 };
 
 document.getElementById('group-eyebrow').textContent = CONFIG.GROUP_EYEBROW;
@@ -598,7 +676,7 @@ async function saveMember(member){
       body: JSON.stringify(member)
     });
     if(!res.ok) return null;
-    const data = await res.json();
+    const data = await res.json(); // { member: {...}, members: [...] }
     members = data.members;
     return data.member;
   }catch(e){
@@ -612,11 +690,6 @@ function isVerified(prenom, nom){
   return CONFIG.VERIFIED_FULL_NAMES.some(n => n.toLowerCase() === prenom.trim().toLowerCase() || n.toLowerCase() === full);
 }
 
-// Vérifie si un membre remplit les 3 critères (basé sur les chiffres enregistrés côté serveur)
-function meetsAllCriteria(m){
-  return CONFIG.CRITERIA.every(c => (m[c.key] || 0) >= c.target);
-}
-
 function badgeSVG(){
   return '<svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 }
@@ -626,7 +699,7 @@ function goTo(screen){
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + screen).classList.add('active');
   document.getElementById('bottom-nav').style.display = (screen==='welcome'||screen==='register'||screen==='confirm') ? 'none' : 'flex';
-  ['contacts','wall','solde','join','admin'].forEach(s=>{
+  ['contacts','wall','solde','join','admin','videos','profile'].forEach(s=>{
     const el = document.getElementById('nav-'+s);
     if(el) el.classList.toggle('active', s===screen);
   });
@@ -634,6 +707,9 @@ function goTo(screen){
   if(screen === 'wall') renderWall();
   if(screen === 'solde') renderSolde();
   if(screen === 'admin') renderAdmin();
+  if(screen === 'videos') renderVideos();
+  if(screen === 'profile') renderProfile();
+  if(screen === 'monetisation') renderMonetisation();
   window.scrollTo(0,0);
 }
 
@@ -797,26 +873,6 @@ async function certifyMember(targetId){
   }catch(e){ console.error(e); }
 }
 
-// Certification automatique : dès que les 3 critères sont remplis, on demande
-// au serveur de valider — ce n'est plus un autre membre qui décide.
-// IMPORTANT : le serveur doit re-vérifier lui-même referralCount/videosCount/likesCount
-// avant d'accepter, sinon n'importe qui pourrait tricher depuis le navigateur.
-async function autoCertifyIfEligible(){
-  const me = members.find(m => m.id === myId);
-  if(!me || me.verified || !meetsAllCriteria(me)) return;
-  try{
-    const res = await fetch('/api/members/' + myId + '/verify', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ requesterId: myId, auto: true })
-    });
-    if(res.ok){
-      const data = await res.json();
-      members = data.members;
-    }
-  }catch(e){ console.error(e); }
-}
-
 function cleanPhone(p){ return p.replace(/[^0-9]/g,''); }
 function escapeHtml(str){
   const d = document.createElement('div');
@@ -825,35 +881,13 @@ function escapeHtml(str){
 }
 
 /* ================== SOLDE / RETRAIT ================== */
-async function renderSolde(){
+function renderSolde(){
   const me = members.find(m => m.id === myId);
   if(!me) return;
   document.getElementById('referral-link').value = window.location.origin + window.location.pathname + '?ref=' + me.id;
-
-  const list = document.getElementById('criteria-list');
-  list.innerHTML = CONFIG.CRITERIA.map(c => {
-    const value = me[c.key] || 0;
-    const done = value >= c.target;
-    return `
-      <div class="crit-row">
-        <div class="crit-check ${done ? 'done' : ''}">${done ? badgeSVG() : ''}</div>
-        <div class="crit-info">
-          <div class="crit-label">${c.label}</div>
-          <div class="crit-progress">${value} / ${c.target}${done ? ' — validé ✓' : ''}</div>
-        </div>
-      </div>`;
-  }).join('');
-
-  const banner = document.getElementById('cert-banner');
-  if(me.verified){
-    banner.textContent = "Tu es certifié ✓ — ta coche bleue est active sur le Cercle et l'Annuaire.";
-  } else if(meetsAllCriteria(me)){
-    banner.textContent = "Bravo, les 3 critères sont remplis ! Vérification en cours auprès du serveur…";
-    await autoCertifyIfEligible();
-  } else {
-    banner.textContent = "Remplis les 3 critères ci-dessus pour obtenir ta certification automatiquement.";
-  }
-
+  document.getElementById('stat-referrals').textContent = me.referralCount || 0;
+  document.getElementById('stat-videos').textContent = me.videosCount || 0;
+  document.getElementById('stat-likes').textContent = me.likesCount || 0;
   document.getElementById('withdraw-error').style.display = 'none';
   document.getElementById('withdraw-success').style.display = 'none';
 }
@@ -936,9 +970,257 @@ async function markPaid(withdrawalId){
   }catch(e){ console.error(e); }
 }
 
+/* ================== VIDEOS ================== */
+let videos = [];
+
+async function loadVideos(){
+  try{
+    const res = await fetch('/api/videos');
+    videos = res.ok ? await res.json() : [];
+  }catch(e){
+    videos = [];
+  }
+}
+
+function toEmbedUrl(url){
+  try{
+    const u = new URL(url);
+    if(u.hostname.includes('youtube.com') || u.hostname.includes('youtu.be')){
+      let id = u.searchParams.get('v');
+      if(!id && u.hostname.includes('youtu.be')) id = u.pathname.slice(1);
+      if(!id && u.pathname.includes('/shorts/')) id = u.pathname.split('/shorts/')[1];
+      return id ? 'https://www.youtube.com/embed/'+id : null;
+    }
+  }catch(e){}
+  return null;
+}
+
+async function submitVideo(){
+  const link = document.getElementById('v-link').value.trim();
+  const desc = document.getElementById('v-desc').value.trim();
+  const errorEl = document.getElementById('video-error');
+  if(!link || !/^https?:\/\//i.test(link)){
+    errorEl.style.display = 'block';
+    return;
+  }
+  errorEl.style.display = 'none';
+  try{
+    const res = await fetch('/api/videos', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ authorId: myId, link, desc })
+    });
+    if(res.ok){
+      const data = await res.json();
+      videos = data.videos;
+      document.getElementById('v-link').value = '';
+      document.getElementById('v-desc').value = '';
+      registerVideoPostedToday();
+      goTo('videos');
+    } else {
+      errorEl.textContent = 'Erreur à la publication, réessaie.';
+      errorEl.style.display = 'block';
+    }
+  }catch(e){
+    errorEl.textContent = 'Le serveur ne répond pas.';
+    errorEl.style.display = 'block';
+  }
+}
+
+function renderVideos(){
+  const list = document.getElementById('videos-list');
+  if(!videos || videos.length === 0){
+    list.innerHTML = '<div class="empty-state">Aucune vidéo publiée pour l\'instant.</div>';
+    return;
+  }
+  list.innerHTML = videos.slice().reverse().map(v => {
+    const author = members.find(m => m.id === v.authorId);
+    const likes = v.likes || [];
+    const comments = v.comments || [];
+    const iLiked = myId && likes.includes(myId);
+    const embed = toEmbedUrl(v.link);
+    return `
+    <div class="video-card">
+      <div class="contact-name">${author ? escapeHtml(author.prenom)+' '+escapeHtml(author.nom) : 'Membre'} ${author && author.verified ? '<span class="badge-verif">'+badgeSVG()+'</span>' : ''}</div>
+      ${v.desc ? '<div class="hint" style="margin:6px 0 0;">'+escapeHtml(v.desc)+'</div>' : ''}
+      <div class="video-embed">
+        ${embed ? '<iframe src="'+embed+'" allowfullscreen></iframe>' : '<a class="contact-action" style="display:block; text-align:center; padding:14px;" href="'+escapeHtml(v.link)+'" target="_blank" rel="noopener">Voir la vidéo</a>'}
+      </div>
+      <div class="video-actions">
+        <button class="${iLiked?'liked':''}" onclick="toggleLike('${v.id}')">🤍 ${likes.length}</button>
+        <button onclick="focusComment('${v.id}')">💬 ${comments.length}</button>
+        <button onclick="shareVideo('${v.id}')">↗ Partager</button>
+      </div>
+      <div class="comment-list">
+        ${comments.map(c => '<div class="comment-item"><b>'+escapeHtml(c.authorName||'Membre')+'</b> '+escapeHtml(c.text)+'</div>').join('')}
+      </div>
+      <div class="comment-input-row">
+        <input type="text" id="comment-input-${v.id}" placeholder="Écrire un commentaire…">
+        <button class="contact-action" onclick="submitComment('${v.id}')">Envoyer</button>
+      </div>
+    </div>
+    `;
+  }).join('');
+}
+
+async function toggleLike(videoId){
+  if(!myId) return;
+  try{
+    const res = await fetch('/api/videos/'+videoId+'/like', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ memberId: myId })
+    });
+    if(res.ok){
+      const data = await res.json();
+      videos = data.videos;
+      renderVideos();
+    }
+  }catch(e){ console.error(e); }
+}
+
+function focusComment(videoId){
+  const el = document.getElementById('comment-input-'+videoId);
+  if(el) el.focus();
+}
+
+async function submitComment(videoId){
+  const input = document.getElementById('comment-input-'+videoId);
+  const text = input.value.trim();
+  if(!text || !myId) return;
+  const me = members.find(m => m.id === myId);
+  try{
+    const res = await fetch('/api/videos/'+videoId+'/comment', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ memberId: myId, authorName: me ? (me.prenom+' '+me.nom) : 'Membre', text })
+    });
+    if(res.ok){
+      const data = await res.json();
+      videos = data.videos;
+      renderVideos();
+    }
+  }catch(e){ console.error(e); }
+}
+
+function shareVideo(videoId){
+  const v = videos.find(x => x.id === videoId);
+  if(!v) return;
+  const shareUrl = v.link;
+  if(navigator.share){
+    navigator.share({ title: CONFIG.GROUP_NAME, url: shareUrl }).catch(()=>{});
+  } else {
+    window.open('https://wa.me/?text=' + encodeURIComponent(shareUrl), '_blank');
+  }
+}
+
+/* ================== PROFIL ================== */
+function renderProfile(){
+  const card = document.getElementById('profile-card');
+  const me = members.find(m => m.id === myId);
+  if(!me){ card.innerHTML = '<div class="empty-state">Profil introuvable.</div>'; return; }
+  card.innerHTML = `
+    <div class="mcard">
+      <div class="mcard-top">
+        <div class="mcard-photo">
+          ${me.photo ? '<img src="'+me.photo+'">' : ''}
+          ${me.verified ? '<div class="badge-verif-lg">'+badgeSVG()+'</div>' : ''}
+        </div>
+        <div>
+          <div class="mcard-name">${escapeHtml(me.prenom)} ${escapeHtml(me.nom)}</div>
+          <div class="mcard-no">Membre n°${me.passengerNo}</div>
+        </div>
+      </div>
+      <div class="mcard-divider"></div>
+      <div class="mcard-meta">
+        <b>${escapeHtml(me.age)} ans</b> <span style="opacity:.5;">🐾</span> ${escapeHtml(me.ville)}<br>
+        <span style="opacity:.5;">💛</span> ${escapeHtml(me.situation)}<br>
+        ${escapeHtml(me.phone)}
+      </div>
+    </div>
+  `;
+}
+
+/* ================== MONETISATION ================== */
+function getVideosToday(){
+  const data = JSON.parse(localStorage.getItem('videosToday_'+myId) || '{"date":"","count":0}');
+  const today = new Date().toDateString();
+  return data.date === today ? data.count : 0;
+}
+
+function registerVideoPostedToday(){
+  const today = new Date().toDateString();
+  const data = JSON.parse(localStorage.getItem('videosToday_'+myId) || '{"date":"","count":0}');
+  const count = data.date === today ? data.count + 1 : 1;
+  localStorage.setItem('videosToday_'+myId, JSON.stringify({ date: today, count }));
+}
+
+function getGroupCount(){
+  return parseInt(localStorage.getItem('groupCount_'+myId) || '0', 10);
+}
+
+function saveGroupCount(){
+  const val = parseInt(document.getElementById('m-group-count').value, 10) || 0;
+  localStorage.setItem('groupCount_'+myId, String(val));
+  renderMonetisation();
+}
+
+function renderMonetisation(){
+  const container = document.getElementById('mon-conditions');
+  const me = members.find(m => m.id === myId);
+  const groupCount = getGroupCount();
+  const videosToday = getVideosToday();
+  document.getElementById('m-group-count').value = groupCount || '';
+
+  const conditions = [
+    { done: groupCount >= 20, label: 'Ajouter au moins 20 membres dans le groupe WhatsApp', sub: groupCount+' / 20 déclarés' },
+    { done: videosToday >= 5, label: 'Publier au moins 5 à 6 vidéos par jour', sub: videosToday+' publiée(s) aujourd\'hui' },
+    { done: !!(me && me.verified), label: 'Être vérifié (pas obligatoire, mais recommandé)', sub: me && me.verified ? 'Compte vérifié' : 'Pas encore vérifié' }
+  ];
+
+  container.innerHTML = conditions.map(c => `
+    <div class="cond-item">
+      <div class="cond-dot ${c.done ? 'done' : ''}">${c.done ? badgeSVG() : ''}</div>
+      <div class="cond-text">${c.label}<small>${c.sub}</small></div>
+    </div>
+  `).join('');
+}
+
+async function requestWithdrawalFromMonetisation(){
+  const amount = parseInt(document.getElementById('m-withdraw-amount').value, 10);
+  const errorEl = document.getElementById('m-withdraw-error');
+  const successEl = document.getElementById('m-withdraw-success');
+  errorEl.style.display = 'none';
+  successEl.style.display = 'none';
+  if(!amount || amount <= 0 || amount > 50000){
+    errorEl.textContent = 'Montant invalide (entre 1 et 50 000 F).';
+    errorEl.style.display = 'block';
+    return;
+  }
+  try{
+    const res = await fetch('/api/withdrawals', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ memberId: myId, amount })
+    });
+    if(res.ok){
+      successEl.style.display = 'block';
+      document.getElementById('m-withdraw-amount').value = '';
+    } else {
+      const data = await res.json().catch(()=>({}));
+      errorEl.textContent = data.error || 'Erreur, réessaie.';
+      errorEl.style.display = 'block';
+    }
+  }catch(e){
+    errorEl.textContent = 'Le serveur ne répond pas.';
+    errorEl.style.display = 'block';
+  }
+}
+
 /* ================== INIT ================== */
 (async function init(){
   await loadMembers();
+  await loadVideos();
   document.getElementById('loader').style.display = 'none';
   const savedId = localStorage.getItem('myMemberId');
   if(savedId && members.find(m => m.id === savedId)){
