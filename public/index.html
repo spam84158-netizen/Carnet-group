@@ -350,7 +350,7 @@
     border-radius:14px; padding:16px; margin-bottom:16px;
   }
   .video-embed{ width:100%; border-radius:10px; overflow:hidden; margin:10px 0; background:#000; }
-  .video-embed iframe{ width:100%; display:block; aspect-ratio:16/9; border:0; }
+  .video-embed video{ width:100%; display:block; max-height:520px; background:#000; }
   .video-actions{ display:flex; gap:10px; margin-top:10px; }
   .video-actions button{
     background:transparent; border:1px solid var(--verre-bord); color:var(--creme);
@@ -378,6 +378,30 @@
   .cond-dot svg{ width:11px; height:11px; }
   .cond-text{ font-size:13px; }
   .cond-text small{ display:block; opacity:.5; font-size:11px; margin-top:2px; }
+
+  /* ---------- PROFIL STYLE TIKTOK ---------- */
+  .profile-header{ display:flex; flex-direction:column; align-items:center; margin-bottom:20px; }
+  .profile-photo{
+    width:96px; height:96px; border-radius:50%; border:2px solid var(--or);
+    object-fit:cover; margin-bottom:14px; position:relative;
+  }
+  .profile-photo-wrap{ position:relative; margin-bottom:14px; }
+  .profile-stats{ display:flex; gap:28px; margin:14px 0 18px; }
+  .profile-stat{ text-align:center; }
+  .profile-stat b{ display:block; font-size:18px; color:var(--creme); font-family:'Cormorant Garamond'; }
+  .profile-stat span{ font-size:10.5px; opacity:.5; letter-spacing:.06em; text-transform:uppercase; }
+  .profile-video-grid{
+    display:grid; grid-template-columns:repeat(3, 1fr); gap:2px;
+    width:100%; max-width:460px;
+  }
+  .profile-video-cell{
+    position:relative; aspect-ratio:9/16; background:#000; border-radius:4px; overflow:hidden;
+  }
+  .profile-video-cell video{ width:100%; height:100%; object-fit:cover; }
+  .profile-video-cell .cell-likes{
+    position:absolute; bottom:6px; left:6px; font-size:11px; color:#fff;
+    background:rgba(0,0,0,0.5); padding:2px 8px; border-radius:100px;
+  }
 </style>
 </head>
 <body>
@@ -441,7 +465,7 @@
       <label>Numéro WhatsApp</label>
       <input type="tel" id="f-phone" placeholder="+225 07 00 00 00 00">
     </div>
-    <div class="hint">Visible par les autres membres du carnet, pour qu'ils puissent te contacter directement.</div>
+    <div class="hint">Indicatif du pays obligatoire (+225, +33, +1...). Visible par les autres membres pour te contacter.</div>
     <div class="form-error" id="form-error">Merci de remplir tous les champs correctement.</div>
     <button class="btn-primary" style="width:100%;" onclick="submitRegistration()">Valider ma carte</button>
   </div>
@@ -535,15 +559,20 @@
   <div class="eyebrow">Nouvelle publication</div>
   <h2 style="color:var(--creme); margin-bottom:22px; font-size:26px;">Publier une vidéo</h2>
   <div class="card-panel">
-    <div class="field">
-      <label>Lien de la vidéo</label>
-      <input type="url" id="v-link" placeholder="https://...">
+    <div class="photo-upload">
+      <div class="photo-preview" id="video-preview">🎥</div>
+      <div>
+        <label class="upload-btn" for="video-input">Choisir ma vidéo</label>
+        <input type="file" id="video-input" accept="video/*" style="display:none;" onchange="handleVideoFile(event)">
+        <div class="hint" style="margin:8px 0 0;">Filmée ou depuis la galerie — max ~30s conseillé</div>
+      </div>
     </div>
+    <video id="video-preview-player" style="width:100%; border-radius:10px; display:none; margin-bottom:16px;" controls></video>
     <div class="field">
       <label>Description</label>
       <input type="text" id="v-desc" placeholder="Un mot sur ta vidéo">
     </div>
-    <div class="form-error" id="video-error">Ajoute un lien valide.</div>
+    <div class="form-error" id="video-error">Ajoute une vidéo pour continuer.</div>
     <button class="btn-primary" style="width:100%;" onclick="submitVideo()">Publier</button>
   </div>
 </div>
@@ -585,7 +614,7 @@
     <h2 class="app-title">Monétisation</h2>
   </div>
   <div class="card-panel" style="max-width:460px;">
-    <div class="hint" style="margin-bottom:18px;">Trois conditions pour débloquer ta monétisation</div>
+    <div class="hint" style="margin-bottom:18px;">Trois conditions pour débloquer les retraits.</div>
     <div id="mon-conditions"></div>
     <div class="mcard-divider" style="margin:20px 0;"></div>
     <div class="field">
@@ -599,7 +628,7 @@
       <input type="number" id="m-withdraw-amount" placeholder="10000" min="1" max="50000">
     </div>
     <div class="form-error" id="m-withdraw-error">Montant invalide.</div>
-    <div class="hint" id="m-withdraw-success" style="display:none; color:var(--or-clair);">Demande envoyée .</div>
+    <div class="hint" id="m-withdraw-success" style="display:none; color:var(--or-clair);">Demande envoyée — elle sera traitée manuellement via Wave.</div>
     <button class="btn-primary" style="width:100%;" onclick="requestWithdrawalFromMonetisation()">Demander un retrait</button>
   </div>
 </div>
@@ -742,6 +771,13 @@ function handlePhoto(e){
   reader.readAsDataURL(file);
 }
 
+/* ================== VALIDATION TELEPHONE ================== */
+function isValidPhoneWithCountryCode(phone){
+  const cleaned = phone.replace(/[\s().-]/g, '');
+  // doit commencer par + suivi d'un indicatif pays (1 à 3 chiffres) puis le reste du numéro
+  return /^\+[1-9]\d{7,14}$/.test(cleaned);
+}
+
 /* ================== SOUMISSION ================== */
 async function submitRegistration(){
   const prenom = document.getElementById('f-prenom').value.trim();
@@ -752,11 +788,16 @@ async function submitRegistration(){
   const phone = document.getElementById('f-phone').value.trim();
 
   let ok = true;
+  const errorEl = document.getElementById('form-error');
+  errorEl.style.display = 'none';
+
   if(!pendingPhoto){ document.getElementById('photo-error').style.display='block'; ok=false; }
   if(!prenom || !nom || !age || !ville || !phone){
-    document.getElementById('form-error').style.display='block'; ok=false;
-  } else {
-    document.getElementById('form-error').style.display='none';
+    errorEl.textContent = 'Merci de remplir tous les champs correctement.';
+    errorEl.style.display='block'; ok=false;
+  } else if(!isValidPhoneWithCountryCode(phone)){
+    errorEl.textContent = "Numéro invalide : ajoute l'indicatif du pays (ex: +225 07 00 00 00 00).";
+    errorEl.style.display='block'; ok=false;
   }
   if(!ok) return;
 
@@ -982,24 +1023,38 @@ async function loadVideos(){
   }
 }
 
-function toEmbedUrl(url){
-  try{
-    const u = new URL(url);
-    if(u.hostname.includes('youtube.com') || u.hostname.includes('youtu.be')){
-      let id = u.searchParams.get('v');
-      if(!id && u.hostname.includes('youtu.be')) id = u.pathname.slice(1);
-      if(!id && u.pathname.includes('/shorts/')) id = u.pathname.split('/shorts/')[1];
-      return id ? 'https://www.youtube.com/embed/'+id : null;
-    }
-  }catch(e){}
-  return null;
+let pendingVideo = null;
+
+function handleVideoFile(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const errorEl = document.getElementById('video-error');
+  errorEl.style.display = 'none';
+
+  const maxBytes = 25 * 1024 * 1024; // 25 Mo, au-delà ça devient trop lourd à envoyer en base64
+  if(file.size > maxBytes){
+    errorEl.textContent = 'Vidéo trop lourde (25 Mo max). Filme un peu plus court.';
+    errorEl.style.display = 'block';
+    e.target.value = '';
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    pendingVideo = ev.target.result; // data URL base64, prête à être envoyée telle quelle
+    const player = document.getElementById('video-preview-player');
+    player.src = pendingVideo;
+    player.style.display = 'block';
+    document.getElementById('video-preview').textContent = '✓';
+  };
+  reader.readAsDataURL(file);
 }
 
 async function submitVideo(){
-  const link = document.getElementById('v-link').value.trim();
   const desc = document.getElementById('v-desc').value.trim();
   const errorEl = document.getElementById('video-error');
-  if(!link || !/^https?:\/\//i.test(link)){
+  if(!pendingVideo){
+    errorEl.textContent = 'Ajoute une vidéo pour continuer.';
     errorEl.style.display = 'block';
     return;
   }
@@ -1008,13 +1063,16 @@ async function submitVideo(){
     const res = await fetch('/api/videos', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ authorId: myId, link, desc })
+      body: JSON.stringify({ authorId: myId, videoData: pendingVideo, desc })
     });
     if(res.ok){
       const data = await res.json();
       videos = data.videos;
-      document.getElementById('v-link').value = '';
+      pendingVideo = null;
       document.getElementById('v-desc').value = '';
+      document.getElementById('video-input').value = '';
+      document.getElementById('video-preview-player').style.display = 'none';
+      document.getElementById('video-preview').textContent = '🎥';
       registerVideoPostedToday();
       goTo('videos');
     } else {
@@ -1022,7 +1080,7 @@ async function submitVideo(){
       errorEl.style.display = 'block';
     }
   }catch(e){
-    errorEl.textContent = 'Le serveur ne répond pas.';
+    errorEl.textContent = 'Le serveur ne répond pas (vidéo trop lourde ?).';
     errorEl.style.display = 'block';
   }
 }
@@ -1038,13 +1096,12 @@ function renderVideos(){
     const likes = v.likes || [];
     const comments = v.comments || [];
     const iLiked = myId && likes.includes(myId);
-    const embed = toEmbedUrl(v.link);
     return `
     <div class="video-card">
       <div class="contact-name">${author ? escapeHtml(author.prenom)+' '+escapeHtml(author.nom) : 'Membre'} ${author && author.verified ? '<span class="badge-verif">'+badgeSVG()+'</span>' : ''}</div>
       ${v.desc ? '<div class="hint" style="margin:6px 0 0;">'+escapeHtml(v.desc)+'</div>' : ''}
       <div class="video-embed">
-        ${embed ? '<iframe src="'+embed+'" allowfullscreen></iframe>' : '<a class="contact-action" style="display:block; text-align:center; padding:14px;" href="'+escapeHtml(v.link)+'" target="_blank" rel="noopener">Voir la vidéo</a>'}
+        <video src="${v.videoData || v.link || ''}" controls playsinline></video>
       </div>
       <div class="video-actions">
         <button class="${iLiked?'liked':''}" onclick="toggleLike('${v.id}')">🤍 ${likes.length}</button>
@@ -1119,24 +1176,40 @@ function renderProfile(){
   const card = document.getElementById('profile-card');
   const me = members.find(m => m.id === myId);
   if(!me){ card.innerHTML = '<div class="empty-state">Profil introuvable.</div>'; return; }
+
+  const myVideos = videos.filter(v => v.authorId === myId).slice().reverse();
+  const followersCount = (me.followers || []).length;
+  const followingCount = members.filter(m => (m.followers || []).includes(myId)).length;
+
   card.innerHTML = `
-    <div class="mcard">
-      <div class="mcard-top">
-        <div class="mcard-photo">
-          ${me.photo ? '<img src="'+me.photo+'">' : ''}
-          ${me.verified ? '<div class="badge-verif-lg">'+badgeSVG()+'</div>' : ''}
-        </div>
-        <div>
-          <div class="mcard-name">${escapeHtml(me.prenom)} ${escapeHtml(me.nom)}</div>
-          <div class="mcard-no">Membre n°${me.passengerNo}</div>
-        </div>
+    <div class="profile-header">
+      <div class="profile-photo-wrap">
+        <img class="profile-photo" src="${me.photo || ''}">
+        ${me.verified ? '<div class="badge-verif-lg" style="right:0; bottom:6px;">'+badgeSVG()+'</div>' : ''}
       </div>
-      <div class="mcard-divider"></div>
-      <div class="mcard-meta">
-        <b>${escapeHtml(me.age)} ans</b> <span style="opacity:.5;">🐾</span> ${escapeHtml(me.ville)}<br>
-        <span style="opacity:.5;">💛</span> ${escapeHtml(me.situation)}<br>
-        ${escapeHtml(me.phone)}
+      <div class="mcard-name">${escapeHtml(me.prenom)} ${escapeHtml(me.nom)} ${me.verified ? '<span class="badge-verif">'+badgeSVG()+'</span>' : ''}</div>
+      <div class="mcard-no">Membre n°${me.passengerNo}</div>
+      <div class="profile-stats">
+        <div class="profile-stat"><b>${myVideos.length}</b><span>Vidéos</span></div>
+        <div class="profile-stat"><b>${followersCount}</b><span>Abonnés</span></div>
+        <div class="profile-stat"><b>${followingCount}</b><span>Abonnements</span></div>
       </div>
+      <div class="mcard-meta" style="text-align:center;">
+        ${escapeHtml(me.age)} ans <span style="opacity:.5;">🐾</span> ${escapeHtml(me.ville)}<br>
+        <span style="opacity:.5;">💛</span> ${escapeHtml(me.situation)}
+      </div>
+    </div>
+    <div class="mcard-divider" style="width:100%; max-width:460px;"></div>
+    <div style="width:100%; display:flex; justify-content:center;">
+      ${myVideos.length === 0
+        ? '<div class="empty-state">Aucune vidéo publiée pour l\'instant.</div>'
+        : '<div class="profile-video-grid">' + myVideos.map(v => `
+            <div class="profile-video-cell">
+              <video src="${v.videoData || v.link || ''}" muted playsinline></video>
+              <span class="cell-likes">❤ ${(v.likes||[]).length}</span>
+            </div>
+          `).join('') + '</div>'
+      }
     </div>
   `;
 }
